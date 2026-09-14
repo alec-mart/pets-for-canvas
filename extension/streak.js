@@ -1,5 +1,5 @@
 // Streak tracking. A streak is a start date; days with nothing due are safe; today goes from
-// stale to extended once everything due is done. Spec: docs/streak-spec.md.
+// stale to extended once everything due is done.
 // Debug: set cd_streak_debug_date (ISO string) in chrome.storage.
 
 (() => {
