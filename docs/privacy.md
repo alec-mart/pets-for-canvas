@@ -34,6 +34,8 @@ No accounts, no passwords, no Canvas access tokens, no tracking of your browsing
 
 ## Changes
 
+The extension and the server are open source: https://github.com/alec-mart/pets-for-canvas
+
 If this policy changes, the new version is posted at this address with a new effective date. Promises made here bind anyone who ever takes over this project or its data.
 
 Earlier versions of the extension (before 1.0.5) offered optional, off-by-default time estimates that sent anonymous "how long did it take?" answers. That feature has been removed. Any answers stored on our server from that period remain anonymous and can be deleted on request with your device id.

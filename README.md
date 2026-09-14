@@ -4,6 +4,8 @@ A pet that lives in your Canvas. Chrome extension, free, no login.
 
 Install: https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc
 
+![Pets for Canvas on a Canvas page](docs/screenshot.png)
+
 Made by a Michigan Tech student. Winston Digital LLC. Built with AI assistance; the product, the design decisions, the art direction and the economy are mine.
 
 ## What it does
@@ -27,6 +29,11 @@ Full policy: https://canvas-digest-production.up.railway.app/privacy
 - `tools/` — store package build (`build-store-zip.sh`), rig builders for the animals, the test bench, the admin inbox reader.
 - `docs/` — privacy policy and the animal/collar test benches.
 
+## Verify what is running
+
+- Store package: `tools/build-store-zip.sh` builds the zip from this repo. Each release is tagged (`v1.0.8`) and the tag message carries the zip's sha256. Unzip the store copy and diff it against a local build.
+- Server: `GET https://canvas-digest-production.up.railway.app/version` returns the commit the running API was deployed from (`tools/deploy.sh` sets it). The API is hosted on Railway and operated by Winston Digital LLC.
+
 ## Run it
 
 Dev copy: `chrome://extensions` → Developer mode → Load unpacked → `extension/`. It points at the production API.
@@ -39,6 +46,10 @@ python3 -m venv .venv && .venv/bin/pip install -r backend/requirements.txt
 ```
 
 The store package is built only by `tools/build-store-zip.sh`: it flips the dev flag, strips dormant code and every comment, and fails if any network call exists outside `network.js`.
+
+## Contributing
+
+Bug reports and security reports are welcome (see `SECURITY.md`). Pull requests are not being taken yet.
 
 ## License
 

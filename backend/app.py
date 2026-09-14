@@ -75,6 +75,12 @@ def healthz() -> dict:
     return {"ok": True}
 
 
+# APP_COMMIT is set by tools/deploy.sh to the public repo commit the running code was built from
+@app.get("/version")
+def version() -> dict:
+    return {"commit": os.environ.get("APP_COMMIT", ""), "source": "https://github.com/alec-mart/pets-for-canvas"}
+
+
 class FeedbackIn(BaseModel):
     device_id: str = Field(min_length=8, max_length=64)
     message: str = Field(min_length=3, max_length=2000)
