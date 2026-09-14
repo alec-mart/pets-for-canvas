@@ -8,7 +8,7 @@ It adds a companion pet to your Canvas pages. The pet reacts to how your semeste
 
 ## What leaves your browser
 
-Nothing about your coursework is collected. The only things that reach our server are what the game needs to keep coin balance accurate:
+Nothing about the content of your coursework is collected. The only things that reach our server are what the game needs to keep coin balance accurate:
 
 - **An anonymous device id.** A random string created on your device. It is not tied to your name, email, or Canvas account.
 - **Your rewards.** Your coins, streak rewards, collars, and companions are kept on our server under that device id, so they cannot be tampered with. When you earn coins, the request names what it is for: the numeric id of the assignment you submitted, with the date, or the streak milestone you reached. When you shop, the request names what you picked, including the name you give your pet.
@@ -26,7 +26,7 @@ To keep your pet across devices, the extension saves your device id in your Canv
 
 ## Deleting your data
 
-Uninstalling the extension deletes everything stored in your browser. To delete your inventory from our server, email the address below with the device id shown in the extension's Settings section. We delete the device and everything stored under it.
+Uninstalling the extension deletes everything stored in your browser. The id saved in your Canvas app storage stays until you ask us to delete your data. To delete your inventory from our server, email the address below with the device id shown in the extension's Settings section. We delete the device and everything stored under it.
 
 ## What we do not do
 
