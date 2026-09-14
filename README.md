@@ -4,7 +4,7 @@ A pet that lives in your Canvas. Chrome extension, free, no login.
 
 Install: https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc
 
-Made by a Michigan Tech student. Winston Digital LLC.
+Made by a Michigan Tech student. Winston Digital LLC. Built with AI assistance; the product, the design decisions, the art direction and the economy are mine.
 
 ## What it does
 

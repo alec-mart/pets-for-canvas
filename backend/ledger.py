@@ -60,7 +60,7 @@ EARNS_PER_MINUTE = 12
 router = APIRouter(prefix="/ledger")
 
 # ── rules ──
-SUBMISSION_POINTS, REPORT_POINTS, VISIT_POINTS = 5, 2, 10   # visit: tapping a classmate's visiting pet
+SUBMISSION_POINTS, VISIT_POINTS = 5, 10   # visit: tapping a classmate's visiting pet
 MILESTONE_POINTS = {7: 15, 10: 25, 25: 100, 30: 120, 50: 300, 75: 500, 100: 1000, 150: 1500, 200: 2000, 365: 4000}
 EARN_MUL = {"gold": 1.15}            # worn-collar rate: legendary only
 ADOPTION_GIFT, RENAME_COST, NICK_COST = 40, 100, 100
@@ -70,7 +70,7 @@ WELCOME_FIRST_DAYS, WELCOME_FIRST_RATE, WELCOME_LATER_RATE, WELCOME_MAX_DAYS = 3
 def welcome_coins(days: int) -> int:
     days = max(0, min(int(days), WELCOME_MAX_DAYS))
     return min(days, WELCOME_FIRST_DAYS) * WELCOME_FIRST_RATE + max(0, days - WELCOME_FIRST_DAYS) * WELCOME_LATER_RATE
-DAILY_CAPS = {"submission": 40, "report": 60, "visit": 4}
+DAILY_CAPS = {"submission": 40, "visit": 4}
 COLLARS = {  # id → (rarity, direct price or None = box only)
     "coral": ("common", 0), "sky": ("common", 60), "mint": ("common", 60), "lilac": ("common", 60), "slate": ("common", 60),
     "sunset": ("uncommon", None), "forest": ("uncommon", None), "berry": ("uncommon", None), "denim": ("uncommon", None),
@@ -89,7 +89,7 @@ TIER_COINS = {"common": 40, "uncommon": 80, "rare": 150, "epic": 300, "legendary
 BOX_DISCOUNT = {"aurora": 30}
 
 DEFAULT = {
-    "balance": 0, "lifetime": 0, "paid": {}, "milestones_paid": {}, "reports_paid": {},
+    "balance": 0, "lifetime": 0, "paid": {}, "milestones_paid": {},
     "owned": ["collar_coral"], "equipped": {"collar": "coral"}, "names": {}, "free_boxes": 0, "first_box": 0, "adopted": 0, "welcome_claimed": 0,
     "milestones_pending": [],
     "day": "", "day_counts": {},
@@ -136,7 +136,7 @@ def _dev_ok(x_dev: str | None) -> bool:
 
 
 class EarnIn(BaseModel):
-    type: str = Field(pattern="^(submission|report|milestone|visit)$")
+    type: str = Field(pattern="^(submission|milestone|visit)$")
     key: str = Field(min_length=1, max_length=120)
 
 
@@ -220,10 +220,6 @@ def earn(device_id: str, e: EarnIn) -> dict:
             if e.key not in s["paid"] and s["day_counts"].get("submission", 0) < DAILY_CAPS["submission"]:
                 s["paid"][e.key] = _today(); s["day_counts"]["submission"] = s["day_counts"].get("submission", 0) + 1
                 pts = SUBMISSION_POINTS
-        elif e.type == "report":
-            if e.key not in s["reports_paid"] and s["day_counts"].get("report", 0) < DAILY_CAPS["report"]:
-                s["reports_paid"][e.key] = _today(); s["day_counts"]["report"] = s["day_counts"].get("report", 0) + 1
-                pts = REPORT_POINTS
         elif e.type == "visit":
             if e.key not in s["paid"] and s["day_counts"].get("visit", 0) < DAILY_CAPS["visit"]:
                 s["paid"][e.key] = _today(); s["day_counts"]["visit"] = s["day_counts"].get("visit", 0) + 1

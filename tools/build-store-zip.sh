@@ -15,7 +15,7 @@ for f in "$TMP/pkg"/*.js; do
   [ "$(basename "$f")" = network.js ] && continue
   if grep -n "fetch(" "$f" | grep -v "fetch(chrome.runtime.getURL" ; then echo "network call outside network.js: $f"; exit 1; fi
 done
-# dormant code never ships: blocks between @strip markers (visits/friends — tabled; dev bridge; sync-code helpers)
+# dormant code never ships: blocks between @strip markers (visits, dev bridge, sync codes)
 python3 - "$TMP/pkg" <<'EOF'
 import re, sys, pathlib, subprocess
 pkg = pathlib.Path(sys.argv[1])

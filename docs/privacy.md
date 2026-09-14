@@ -11,7 +11,7 @@ It adds a companion pet to your Canvas pages. The pet reacts to how your semeste
 Nothing about your coursework is collected. The only things that reach our server are what the game needs to keep your rewards honest:
 
 - **An anonymous device id.** A random string created on your device. It is not tied to your name, email, or Canvas account.
-- **Your rewards.** Your coins, streak rewards, collars, and companions are kept on our server under that device id, so they cannot be tampered with. When you earn coins, the request names what it is for: the numeric id of the assignment you submitted, or the streak milestone you reached. When you shop, the request names what you picked.
+- **Your rewards.** Your coins, streak rewards, collars, and companions are kept on our server under that device id, so they cannot be tampered with. When you earn coins, the request names what it is for: the numeric id of the assignment you submitted, with the date, or the streak milestone you reached. When you shop, the request names what you picked, including the name you give your pet.
 - **Feedback you choose to send.** If you use the feedback box in Settings, we store your message with your device id and the extension version.
 
 That is the complete list. Nothing else is ever sent. The extension's network code lives in a single file in the package (network.js), so anyone can check this.
@@ -20,7 +20,7 @@ That is the complete list. Nothing else is ever sent. The extension's network co
 
 Your name, email, Canvas user id, grades, submissions, assignment titles, messages, discussion posts, and anything about other students. To know how you are doing, the pet reads your course list and whether anything is overdue from your own Canvas session. That information stays in your browser and is never stored on our servers.
 
-Your pet's mood, position, and name live only in your browser.
+Your pet's mood and position live only in your browser.
 
 To keep your pet across devices, the extension saves your device id in your Canvas account's private app storage. Only you can read it. It contains nothing about you.
 

@@ -1,7 +1,7 @@
-"""Pets for Canvas API: the coin ledger, feedback, promo codes, and the privacy page. The report and estimate endpoints are legacy; no shipped client calls them.
+"""Pets for Canvas API: the coin ledger, feedback, promo codes, and the privacy page.
 
 Run locally:  .venv/bin/uvicorn backend.app:app --reload
-Deploy:       set DATABASE_URL (Postgres), MIN_N=5, CORS_ORIGINS.
+Deploy:       set DATABASE_URL (Postgres), CORS_ORIGINS, DEV_SECRET.
 """
 
 import os
@@ -13,15 +13,11 @@ from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sqlalchemy import func, insert, select
-from sqlalchemy.exc import IntegrityError
 
-from .db import devices, engine, feedback, init_db, reports
+from .db import engine, feedback, init_db
 from .ledger import _dev_ok, ledgers, promo_codes, promo_redemptions, router as ledger_router
 from .social import router as social_router
 
-BUCKETS = ["lt1", "1_3", "3_6", "6_10", "gt10"]
-MIN_N = int(os.environ.get("MIN_N", "5"))  # privacy floor — 5 by default; override only for local dev
-REPORT_CAP = 60  # reports per device per day
 
 app = FastAPI(title="canvas-digest", docs_url=None, redoc_url=None)
 # any Canvas domain: the API is anonymous (no cookies, no credentials, self-minted device ids), so open CORS is safe
@@ -74,17 +70,6 @@ def privacy_check() -> dict:
     return {"policy_present": _PRIVACY_MD.exists()}
 
 
-class ReportIn(BaseModel):
-    device_id: str = Field(min_length=8, max_length=64, pattern="^[A-Za-z0-9]+$")
-    host: str = Field(default="mtu.instructure.com", max_length=120)  # the Canvas domain the report came from
-    course_id: int
-    assignment_id: int
-    kind: str = Field(default="assignment", max_length=32)
-    bucket: str
-    title: str = Field(default="", max_length=300)
-    reported_at: str | None = Field(default=None, max_length=40)
-
-
 @app.get("/healthz")
 def healthz() -> dict:
     return {"ok": True}
@@ -117,17 +102,6 @@ def admin_inbox(x_dev: str | None = Header(default=None), limit: int = Query(def
     week = datetime.now(timezone.utc) - timedelta(days=7)
     with engine.begin() as conn:
         fb = conn.execute(select(feedback).order_by(feedback.c.created_at.desc()).limit(limit)).mappings().all()
-        n_dev = conn.execute(select(func.count()).select_from(devices)).scalar_one()
-        n_dev_wk = conn.execute(select(func.count()).select_from(devices).where(devices.c.created_at >= week)).scalar_one()
-        n_rep = conn.execute(select(func.count()).select_from(reports)).scalar_one()
-        n_rep_wk = conn.execute(select(func.count()).select_from(reports).where(reports.c.created_at >= week)).scalar_one()
-        hosts = conn.execute(
-            select(reports.c.host, func.count().label("n")).group_by(reports.c.host).order_by(func.count().desc()).limit(10)
-        ).all()
-        recent = conn.execute(
-            select(reports.c.host, reports.c.bucket, reports.c.kind, reports.c.title, reports.c.created_at)
-            .order_by(reports.c.created_at.desc()).limit(30)
-        ).mappings().all()
         # installs = ledgers: content.js creates one the first time the extension loads on a Canvas page
         import json as _json
         led = conn.execute(select(ledgers.c.device_id, ledgers.c.state, ledgers.c.created_at, ledgers.c.updated_at)
@@ -162,14 +136,11 @@ def admin_inbox(x_dev: str | None = Header(default=None), limit: int = Query(def
         installs.append({"device": did[:8], "device_full": did, "installed": iso(cat), "last_seen": iso(uat), "adopted": bool(j.get("adopted")),
                          "animal": (j.get("equipped") or {}).get("animal"), "balance": j.get("balance", 0), "lifetime": j.get("lifetime", 0)})
     return {
-        "pulse": {"installs": n_led, "installs_7d": n_led_wk, "devices": n_dev, "devices_7d": n_dev_wk, "reports": n_rep, "reports_7d": n_rep_wk,
-                  "hosts": [{"host": h, "reports": n} for h, n in hosts]},
+        "pulse": {"installs": n_led, "installs_7d": n_led_wk},
         "installs": installs,
         "promos": promos,
         "feedback": [{"id": r["id"], "at": iso(r["created_at"]), "device": r["device_id"][:8], "version": r["version"],
                       "host": r["host"], "message": r["message"]} for r in fb],
-        "recent_reports": [{"at": iso(r["created_at"]), "host": r["host"], "bucket": r["bucket"], "kind": r["kind"],
-                            "title": r["title"][:80]} for r in recent],
     }
 
 
@@ -187,14 +158,12 @@ def admin_purge(p: PurgeIn, x_dev: str | None = Header(default=None)) -> dict:
     from sqlalchemy import delete, or_
     with engine.begin() as conn:
         ids = {r[0] for r in conn.execute(select(ledgers.c.device_id)).all()}
-        ids |= {r[0] for r in conn.execute(select(devices.c.device_id)).all()}
-        ids |= {r[0] for r in conn.execute(select(reports.c.device_id)).all()}
         ids |= {r[0] for r in conn.execute(select(feedback.c.device_id)).all()}
         ids |= {r[0] for r in conn.execute(select(promo_redemptions.c.device_id)).all()}
         doomed = sorted(i for i in ids if (p.non_hex and not _re.fullmatch(r"[0-9a-f]{32}", i)) or any(i.startswith(x) for x in p.prefixes if x))
         n = {}
         from .social import presence
-        for t in (ledgers, devices, reports, feedback, presence, promo_redemptions):
+        for t in (ledgers, feedback, presence, promo_redemptions):
             if doomed:
                 n[t.name] = conn.execute(delete(t).where(t.c.device_id.in_(doomed))).rowcount
     return {"purged": doomed, "rows": n}
@@ -263,71 +232,3 @@ def privacy() -> str:
         "h1{font-size:28px}h2{font-size:19px;margin-top:28px}li{margin:4px 0}</style>"
         f"<body>{body}</body>"
     )
-
-
-@app.post("/reports")
-def create_report(r: ReportIn) -> dict:
-    if r.bucket not in BUCKETS:
-        raise HTTPException(422, f"bucket must be one of {BUCKETS}")
-    with engine.begin() as conn:
-        # only a device with a ledger may report, capped per day
-        from .ledger import ledgers as _ledgers
-        if conn.execute(select(_ledgers.c.device_id).where(_ledgers.c.device_id == r.device_id)).first() is None:
-            raise HTTPException(403, "unknown device")
-        today_count = conn.execute(
-            select(func.count()).select_from(reports).where(
-                reports.c.device_id == r.device_id, reports.c.created_at >= func.now() - __import__("datetime").timedelta(days=1)
-            )
-        ).scalar() or 0
-        if today_count >= REPORT_CAP:
-            raise HTTPException(429, "daily report cap")
-        exists = conn.execute(
-            select(devices.c.device_id).where(devices.c.device_id == r.device_id)
-        ).first()
-        if not exists:
-            conn.execute(insert(devices).values(device_id=r.device_id))
-        try:
-            conn.execute(
-                insert(reports).values(
-                    device_id=r.device_id,
-                    host=r.host.lower().strip(),
-                    course_id=r.course_id,
-                    assignment_id=r.assignment_id,
-                    kind=r.kind,
-                    bucket=r.bucket,
-                    title=r.title,
-                    reported_at=r.reported_at,
-                )
-            )
-        except IntegrityError:
-            return {"status": "duplicate"}  # never-ask-twice, server half
-    return {"status": "ok"}
-
-
-@app.get("/estimates")
-def get_estimates(
-    ids: str = Query(..., description="comma-separated assignment ids"),
-    host: str = Query("mtu.instructure.com", max_length=120, description="Canvas domain the ids belong to"),
-) -> dict:
-    try:
-        assignment_ids = [int(x) for x in ids.split(",") if x.strip()][:100]
-    except ValueError:
-        raise HTTPException(422, "ids must be comma-separated integers")
-    out: dict[str, dict] = {}
-    with engine.connect() as conn:
-        rows = conn.execute(
-            select(reports.c.assignment_id, reports.c.bucket).where(
-                reports.c.host == host.lower().strip(),
-                reports.c.assignment_id.in_(assignment_ids),
-            )
-        ).all()
-    by_assignment: dict[int, list[int]] = {}
-    for aid, bucket in rows:
-        by_assignment.setdefault(aid, []).append(BUCKETS.index(bucket))
-    for aid, indices in by_assignment.items():
-        if len(indices) < MIN_N:
-            continue
-        indices.sort()
-        median = indices[len(indices) // 2]
-        out[str(aid)] = {"bucket": BUCKETS[median], "n": len(indices)}
-    return out

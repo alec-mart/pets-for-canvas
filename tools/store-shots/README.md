@@ -1,4 +1,4 @@
-# Store screenshots rig (2026-09-06)
+# Store screenshots rig
 
 The popup can't be captured from chrome-extension:// pages, so this renders the REAL popup in headless Chrome
 with faked extension APIs and a seeded state, inside a 1280×800 marketing frame.
@@ -11,3 +11,4 @@ with faked extension APIs and a seeded state, inside a 1280×800 marketing frame
    "http://127.0.0.1:8765/frame.html?state=home&h=Pets%3Csmall%3Efor%20Canvas%3C%2Fsmall%3E&t=<tagline>"`
    states: home | shop | wardrobe | claim. `frame2.html?t=` wraps `page.jpg` (a real Canvas capture) in a browser window.
 4. `sips -z 800 1280 out.png` → exact store size.
+Headline/tagline text in the frames is Alec's — never invent it (no-unrequested-copy rule).
