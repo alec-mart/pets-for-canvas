@@ -1,0 +1,38 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>rig dissect</title>
+<style>
+  body{margin:0;background:#fff;font:600 11px system-ui}
+  #grid{display:grid;grid-template-columns:repeat(13,1fr);gap:2px;padding:4px}
+  .cell{text-align:center;border:1px solid #eee}
+  .cell svg{width:100%;height:auto;display:block}
+  .cell .n{color:#c00}
+</style>
+<div id="grid"></div>
+<script>
+(async () => {
+  const src = await (await fetch("../extension/art/" + (new URLSearchParams(location.search).get("f") ?? "winston-recraft-2.svg"))).text();
+  const doc = new DOMParser().parseFromString(src, "image/svg+xml");
+  const paths = [...doc.querySelectorAll("path")];
+  const grid = document.getElementById("grid");
+  paths.forEach((_, i) => {
+    const d2 = new DOMParser().parseFromString(src, "image/svg+xml");
+    const ps = [...d2.querySelectorAll("path")];
+    ps.forEach((p, j) => {
+      if (j === i) {
+        p.setAttribute("fill", "#FF0033");
+        p.setAttribute("stroke", "#FF0033");
+        p.setAttribute("stroke-width", "6");
+        d2.documentElement.appendChild(p); // raise to top
+      } else {
+        p.setAttribute("opacity", "0.25");
+      }
+    });
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    d2.documentElement.setAttribute("viewBox", "140 95 750 840");
+    cell.innerHTML = d2.documentElement.outerHTML + `<div class="n">${i}</div>`;
+    grid.appendChild(cell);
+  });
+})();
+</script>

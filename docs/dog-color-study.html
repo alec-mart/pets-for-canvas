@@ -1,0 +1,91 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>dog color study</title>
+<style>
+  body { margin:0; font: 13px -apple-system, sans-serif; background:#F6F8FA; padding:26px; }
+  .row { display:flex; gap:34px; align-items:flex-end; justify-content:center; margin-bottom:8px; }
+  .cell { text-align:center; }
+  .cell p { margin:6px 0 0; font-weight:600; color:#334451; }
+  .gray svg { filter: grayscale(1); }
+  h3 { text-align:center; color:#5C6B78; font-size:12px; text-transform:uppercase; letter-spacing:.06em; margin:18px 0 10px;}
+  .dark { background:#1D252D; border-radius:12px; padding:14px 0 2px; }
+  .dark p { color:#cfd8e0; }
+</style>
+<body>
+<h3>candidates — 200px</h3>
+<div class="row" id="big"></div>
+<h3>grayscale value test (the research's diagnostic)</h3>
+<div class="row gray" id="gray"></div>
+<h3>small (64px) + dark ground</h3>
+<div class="row dark" id="small"></div>
+<script>
+const T = (p) => `
+<svg viewBox="0 0 100 100" width="W" height="W">
+  <defs>
+    <linearGradient id="f_N" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${p.fur1}"/><stop offset="55%" stop-color="${p.fur2}"/><stop offset="100%" stop-color="${p.fur3}"/>
+    </linearGradient>
+    <linearGradient id="e_N" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${p.ear1}"/><stop offset="100%" stop-color="${p.ear2}"/>
+    </linearGradient>
+    <linearGradient id="c_N" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${p.cream1}"/><stop offset="100%" stop-color="${p.cream2}"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="50" cy="95.5" rx="25" ry="3.1" fill="rgba(40,30,15,.15)"/>
+  <g ${p.line ? `stroke="${p.line}" stroke-width="1.8" stroke-linejoin="round"` : ""}>
+    <path d="M30 82 Q17 82 13 71 Q11 64 17 64 Q20 72 32 75 Z" fill="url(#e_N)"/>
+    <ellipse cx="50" cy="75" rx="23" ry="18" fill="url(#f_N)"/>
+    <ellipse cx="50" cy="82" rx="15" ry="10" fill="url(#c_N)" ${p.line ? 'stroke="none"' : ""}/>
+    <path d="M33 63 Q50 72 67 63" stroke="${p.collar}" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <circle cx="50" cy="69.5" r="3" fill="#FFD166" ${p.line ? 'stroke="none"' : ""}/>
+    <ellipse cx="38" cy="92" rx="8.5" ry="5" fill="${p.feet}"/>
+    <ellipse cx="62" cy="92" rx="8.5" ry="5" fill="${p.feet}"/>
+    <circle cx="50" cy="38" r="26" fill="url(#f_N)"/>
+    <ellipse cx="42" cy="22" rx="12" ry="6.5" fill="${p.sheen}" opacity=".45" stroke="none"/>
+    <path d="M60 14 A26 26 0 0 1 76 36 L61 43 Q55 28 57 13 Z" fill="${p.patch}" stroke="none"/>
+    <path d="M30 16 Q18 20 17 36 Q16.5 47 24 46 Q31 45 33 32 Q34 22 30 16 Z" fill="url(#e_N)"/>
+    <path d="M70 16 Q82 20 83 36 Q83.5 47 76 46 Q69 45 67 32 Q66 22 70 16 Z" fill="url(#e_N)"/>
+    <ellipse cx="50" cy="50" rx="13.5" ry="10" fill="url(#c_N)" ${p.line ? 'stroke="none"' : ""}/>
+    <ellipse cx="37" cy="43" rx="8" ry="8.4" fill="#FFFDF6" stroke="none"/>
+    <ellipse cx="63" cy="43" rx="8" ry="8.4" fill="#FFFDF6" stroke="none"/>
+    <circle cx="37.3" cy="44" r="5.9" fill="#2B2A33" stroke="none"/>
+    <circle cx="63.3" cy="44" r="5.9" fill="#2B2A33" stroke="none"/>
+    <circle cx="39.1" cy="41.9" r="1.9" fill="#fff" stroke="none"/>
+    <circle cx="65.1" cy="41.9" r="1.9" fill="#fff" stroke="none"/>
+    <ellipse cx="50" cy="48.5" rx="4.6" ry="3.4" fill="${p.nose}" stroke="none"/>
+    <path d="M50 51.5 L50 54.5 M50 54.5 Q45.5 58.5 42.5 55 M50 54.5 Q54.5 58.5 57.5 55" stroke="${p.nose}" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <circle cx="29" cy="51" r="4" fill="${p.blush}" opacity=".6" stroke="none"/>
+    <circle cx="71" cy="51" r="4" fill="${p.blush}" opacity=".6" stroke="none"/>
+  </g>
+</svg>`;
+
+const variants = {
+  "CURRENT": { fur1:"#F8D9A6", fur2:"#F2C98C", fur3:"#E8B672", ear1:"#E0AC6B", ear2:"#C98F4C",
+    cream1:"#FFF7E8", cream2:"#F3DFC0", feet:"#E3B172", patch:"#DFA967", sheen:"#FFE9C2",
+    nose:"#4A3B33", blush:"#F7B2C4", collar:"#E2574C", line:null },
+  "A · value rework": { fur1:"#FFD98F", fur2:"#F3BC6C", fur3:"#DE9E4E", ear1:"#B9803F", ear2:"#96622C",
+    cream1:"#FFF6E3", cream2:"#F2DDB6", feet:"#B9803F", patch:"#C4883F", sheen:"#FFE9C2",
+    nose:"#45362B", blush:"#F9A8BC", collar:"#E4584B", line:null },
+  "B · rework + outline": { fur1:"#FFD98F", fur2:"#F3BC6C", fur3:"#DE9E4E", ear1:"#B9803F", ear2:"#96622C",
+    cream1:"#FFF6E3", cream2:"#F2DDB6", feet:"#B9803F", patch:"#C4883F", sheen:"#FFE9C2",
+    nose:"#45362B", blush:"#F9A8BC", collar:"#E4584B", line:"#7E5426" },
+  "C · shiba colorway": { fur1:"#FCB56B", fur2:"#F09A48", fur3:"#DB7F2E", ear1:"#D97B2E", ear2:"#B25E1A",
+    cream1:"#FFFAF1", cream2:"#F7E9D4", feet:"#D97B2E", patch:"#C4680F", sheen:"#FFDCB0",
+    nose:"#45362B", blush:"#F9A8BC", collar:"#3E8E8B", line:"#8A4E1B" },
+};
+
+let n = 0;
+function render(target, size) {
+  for (const [name, p] of Object.entries(variants)) {
+    n++;
+    const html = T(p).replaceAll("_N", "_" + n).replaceAll("W", size);
+    document.getElementById(target).insertAdjacentHTML("beforeend",
+      `<div class="cell">${html}<p>${name}</p></div>`);
+  }
+}
+render("big", 200);
+render("gray", 130);
+render("small", 64);
+</script>
+</body>

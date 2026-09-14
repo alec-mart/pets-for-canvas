@@ -1,0 +1,66 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>dog preview</title>
+<style>
+  body { margin:0; font: 13px -apple-system, sans-serif; background:#F6F8FA; display:flex; flex-direction:column; align-items:center; gap:24px; padding:30px; }
+  .row { display:flex; gap:40px; align-items:flex-end; }
+  .dark { background:#1D252D; padding:20px 40px; border-radius:12px; }
+  svg { display:block; }
+</style>
+<body>
+<div class="row" id="main"></div>
+<div class="row dark" id="darkrow"></div>
+<script>
+const DOG = `
+<svg viewBox="0 0 100 100" width="SIZE" height="SIZE">
+  <defs>
+    <linearGradient id="cdgFurGID" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F8D9A6"/><stop offset="55%" stop-color="#F2C98C"/><stop offset="100%" stop-color="#E8B672"/>
+    </linearGradient>
+    <linearGradient id="cdgEarGID" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E0AC6B"/><stop offset="100%" stop-color="#C98F4C"/>
+    </linearGradient>
+    <linearGradient id="cdgCreamGID" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFF7E8"/><stop offset="100%" stop-color="#F3DFC0"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="50" cy="95.5" rx="25" ry="3.1" fill="rgba(40,30,15,.15)"/>
+  <g>
+    <path d="M30 82 Q17 82 13 71 Q11 64 17 64 Q20 72 32 75 Z" fill="url(#cdgEarGID)"/>
+    <ellipse cx="50" cy="75" rx="23" ry="18" fill="url(#cdgFurGID)"/>
+    <ellipse cx="50" cy="82" rx="15" ry="10" fill="url(#cdgCreamGID)"/>
+    <ellipse cx="50" cy="64" rx="16" ry="3.8" fill="rgba(140,95,35,.13)"/>
+    <path d="M33 63 Q50 72 67 63" stroke="#E2574C" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <circle cx="50" cy="69.5" r="3" fill="#FFD166"/>
+    <ellipse cx="38" cy="92" rx="8.5" ry="5" fill="#E3B172"/>
+    <ellipse cx="62" cy="92" rx="8.5" ry="5" fill="#E3B172"/>
+    <circle cx="50" cy="38" r="26" fill="url(#cdgFurGID)"/>
+    <ellipse cx="42" cy="22" rx="12" ry="6.5" fill="#FFE9C2" opacity=".4"/>
+    <path d="M60 14 A26 26 0 0 1 76 36 L61 43 Q55 28 57 13 Z" fill="#DFA967"/>
+    <g>
+      <path d="M30 16 Q18 20 17 36 Q16.5 47 24 46 Q31 45 33 32 Q34 22 30 16 Z" fill="url(#cdgEarGID)"/>
+      <path d="M21 36 Q20.5 44.5 24.5 44.3 Q28.5 43.6 30.2 35 Q26 39.5 21 36 Z" fill="rgba(120,75,30,.30)"/>
+    </g>
+    <g>
+      <path d="M70 16 Q82 20 83 36 Q83.5 47 76 46 Q69 45 67 32 Q66 22 70 16 Z" fill="url(#cdgEarGID)"/>
+      <path d="M79 36 Q79.5 44.5 75.5 44.3 Q71.5 43.6 69.8 35 Q74 39.5 79 36 Z" fill="rgba(120,75,30,.30)"/>
+    </g>
+    <ellipse cx="50" cy="50" rx="13.5" ry="10" fill="url(#cdgCreamGID)"/>
+    <ellipse cx="37" cy="43" rx="8" ry="8.4" fill="#FFFDF6"/>
+    <ellipse cx="63" cy="43" rx="8" ry="8.4" fill="#FFFDF6"/>
+    <circle cx="37.3" cy="44" r="5.9" fill="#2B2A33"/>
+    <circle cx="63.3" cy="44" r="5.9" fill="#2B2A33"/>
+    <circle cx="39.1" cy="41.9" r="1.9" fill="#fff"/>
+    <circle cx="65.1" cy="41.9" r="1.9" fill="#fff"/>
+    <ellipse cx="50" cy="48.5" rx="4.6" ry="3.4" fill="#4A3B33"/>
+    <path d="M50 51.5 L50 54.5 M50 54.5 Q45.5 58.5 42.5 55 M50 54.5 Q54.5 58.5 57.5 55" stroke="#4A3B33" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <circle cx="29" cy="51" r="4" fill="#F7B2C4" opacity=".55"/>
+    <circle cx="71" cy="51" r="4" fill="#F7B2C4" opacity=".55"/>
+  </g>
+</svg>`;
+let uid = 0;
+function stamp(s, size) { uid++; return s.replaceAll("SIZE", size).replaceAll("GID", uid); }
+for (const s of [320, 160, 92, 48]) document.getElementById("main").insertAdjacentHTML("beforeend", stamp(DOG, s));
+for (const s of [160, 92]) document.getElementById("darkrow").insertAdjacentHTML("beforeend", stamp(DOG, s));
+</script>
+</body>

@@ -1,0 +1,56 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>rig bench</title>
+<style>
+  body{margin:0;background:#fff;font:700 12px system-ui;color:#333}
+  #row{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;padding:8px}
+  .slot{text-align:center}
+  .slot svg{width:100%;height:auto;display:block}
+  /* engine defaults */
+  .cd-mouth-sad,.cd-mouth-open,.cd-zzz{opacity:0}
+  .cd-ear-l,.cd-ear-r,.cd-tail{transform-origin:0 0}
+  /* state variants */
+  .s-blink .cd-lids{opacity:1}
+  .s-sad .cd-mouth-happy{opacity:0}
+  .s-sad .cd-mouth-sad{opacity:1}
+  .s-sad .cd-ear-l{transform:rotate(-13deg)}
+  .s-sad .cd-ear-r{transform:rotate(13deg)}
+  .s-open .cd-mouth-happy{opacity:0}
+  .s-open .cd-mouth-open{opacity:1}
+  .s-earflop .cd-ear-l{transform:rotate(-14deg)}
+  .s-earflop .cd-ear-r{transform:rotate(14deg)}
+  .s-tailup .cd-tail{transform:rotate(-18deg)}
+  .s-taildown .cd-tail{transform:rotate(14deg)}
+  .s-gaze .cd-pupils{transform:translate(20px,14px)}
+  .s-sleep .cd-lids{opacity:1}
+  .s-sleep .cd-zzz{opacity:1}
+  .s-sleep .cd-ear-l{transform:rotate(-8deg)}
+  .s-sleep .cd-ear-r{transform:rotate(8deg)}
+</style>
+<div id="row"></div>
+<script>
+(async () => {
+  const src = await (await fetch("../extension/art/winston-rig.svg")).text();
+  const states = [
+    ["", "default"], ["s-blink", "blink"], ["s-sad", "sad"], ["s-open", "open/yawn"],
+    ["s-earflop", "ear flop ±14°"], ["s-tailup", "tail −18°"], ["s-taildown", "tail +14°"],
+    ["s-sleep", "sleep (standing)"],
+  ];
+  const row = document.getElementById("row");
+  for (const [cls, label] of states) {
+    const slot = document.createElement("div");
+    slot.className = "slot " + cls;
+    slot.innerHTML = src.replace('viewBox="0 0 1024 1024"', 'viewBox="120 80 790 870"') + `<div>${label}</div>`;
+    row.appendChild(slot);
+  }
+  // replica of the real extension mount: 100×100 viewBox + ART_TRANSFORM wrapper.
+  // proves transform-origin:0 0 still pivots at the baked joints under the scale.
+  const inner = src.replace(/^[\s\S]*?<svg[^>]*>/, "").replace(/<\/svg>\s*$/, "");
+  for (const [cls, label] of [["s-earflop s-tailup", "MOUNTED earflop+tail"], ["s-sad", "MOUNTED sad"]]) {
+    const slot = document.createElement("div");
+    slot.className = "slot " + cls;
+    slot.innerHTML = `<svg viewBox="0 0 100 100"><g transform="translate(-6.05,-6.97) scale(0.1088)">${inner}</g></svg><div>${label}</div>`;
+    row.appendChild(slot);
+  }
+})();
+</script>

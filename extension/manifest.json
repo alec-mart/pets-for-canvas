@@ -1,0 +1,58 @@
+{
+  "manifest_version": 3,
+  "name": "Pets for Canvas",
+  "version": "1.0.8",
+  "description": "A pet that lives in your Canvas.",
+  "permissions": [
+    "storage",
+    "scripting",
+    "activeTab"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.instructure.com/*"
+      ],
+      "js": [
+        "coin.js",
+        "collar-engine.js",
+        "network.js",
+        "ledger.js",
+        "content.js",
+        "streak.js",
+        "economy.js",
+        "pet.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "art/*",
+        "fonts/*"
+      ],
+      "matches": [
+        "https://*/*"
+      ],
+      "use_dynamic_url": true
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Pets for Canvas",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
+  },
+  "optional_host_permissions": [
+    "https://*/*"
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

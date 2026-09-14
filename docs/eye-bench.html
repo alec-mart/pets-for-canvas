@@ -1,0 +1,42 @@
+<!doctype html><meta charset="utf-8"><title>eye bench</title>
+<style>body{margin:0;background:#fff;font:600 12px system-ui;color:#333}.row{display:flex;align-items:flex-end}.c{width:240px;text-align:center;padding:6px 0}.c svg{width:240px;height:240px;display:block}.lbl{font-weight:800;margin-bottom:2px}.cd-zzz{opacity:0}.green{background:#9fd49f}</style>
+<div id="grid"></div>
+<script>
+// Eye bench (2026-09-08): the single white dot reads lifeless. Variants layer research-backed fixes:
+// B secondary catchlight (small, lower-right)  C + iris rim light (soft lighter arc along the bottom of the disc)
+// D + bigger, slightly cool primary highlight + a faint gloss over the top of the eye
+const SPECIES = {
+  pup:  { art: "../extension/art/winston-rig.svg", eyes: [[376, 325], [609, 325]], r: 42, rim: "#5A3A22", flip: false, zoom: "300 250 390 160" },
+  cat:  { art: "../extension/art/cat-rig.svg",     eyes: [[554, 343], [286, 345]], r: 52, rim: "#8C90A8", flip: false, zoom: "210 270 430 160" },
+  capy: { art: "../extension/art/capy-rig.svg",    eyes: [[770, 298]],             r: 29, rim: "#6E4C30", flip: true,  zoom: "180 240 200 120" },
+};
+const overlay = (sp, variant, uid) => sp.eyes.map(([cx, cy], i) => {
+  const r = sp.r; let s = "";
+  if (variant >= 2) s += `<clipPath id="lower${uid}${i}"><rect x="${cx - r}" y="${cy}" width="${2 * r}" height="${r}"/></clipPath>`
+                     + `<circle cx="${cx}" cy="${cy}" r="${r * 0.78}" fill="none" stroke="${sp.rim}" stroke-width="${r * 0.14}" opacity=".55" clip-path="url(#lower${uid}${i})"/>`;
+  if (variant >= 3) s += `<radialGradient id="gl${uid}${i}" cx="50%" cy="30%" r="60%"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>`
+                     + `<circle cx="${cx}" cy="${cy}" r="${r * 0.98}" fill="url(#gl${uid}${i})"/>`
+                     + `<circle cx="${cx - r * 0.3}" cy="${cy - r * 0.32}" r="${r * 0.3}" fill="#F4FAFF"/>`;   // bigger, cooler primary
+  if (variant >= 1) s += `<circle cx="${cx + r * 0.42}" cy="${cy + r * 0.38}" r="${r * 0.13}" fill="#FFFFFF" opacity=".95"/>`;  // secondary catchlight
+  return s;
+}).join("");
+(async () => {
+  const grid = document.getElementById("grid");
+  const names = ["A current", "B + secondary catchlight", "C + iris rim light", "D + cool primary + gloss"];
+  for (const [key, sp] of Object.entries(SPECIES)) {
+    const rig = await (await fetch(sp.art, { cache: "no-store" })).text();
+    const row = document.createElement("div"); row.className = "row";
+    names.forEach((n, v) => {
+      const uid = key + v;
+      let r = rig.replace(/id="([A-Za-z_]+)(\d*)"/g, `id="$1$2${uid}"`).replace(/url\(#([A-Za-z_]+\d*)\)/g, `url(#$1${uid})`).replace(/href="#([A-Za-z_]+\d*)"/g, `href="#$1${uid}"`);
+      r = r.replace(/<\/svg>\s*$/, `<g class="eye-fx">${overlay(sp, v, uid)}</g></svg>`);
+      if (sp.flip) r = r.replace(/<svg([^>]*)>/, `<svg$1><g transform="translate(1024,0) scale(-1,1)">`).replace(/<\/svg>\s*$/, "</g></svg>");
+      if (new URLSearchParams(location.search).get("zoom")) r = r.replace(/viewBox="[^"]*"/, `viewBox="${sp.zoom}"`);   // ?zoom=1 → eyes only
+      const c = document.createElement("div"); c.className = "c" + (v % 2 ? " green" : "");
+      c.innerHTML = `<div class="lbl">${key} · ${n}</div>${r}`;
+      row.appendChild(c);
+    });
+    grid.appendChild(row);
+  }
+})();
+</script>

@@ -1,0 +1,42 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>bed preview</title>
+<style>
+  body { margin:0; font: 13px -apple-system, sans-serif; background:#F6F8FA; padding:24px; }
+  .stage { position:relative; height:340px; background:#fff; border:1px solid #D5DDE4; border-radius:12px; margin-bottom:14px; overflow:hidden; }
+  .scaleWrap { position:absolute; left:60px; bottom:20px; transform: scale(2.2); transform-origin: bottom left; }
+  .layer { position:absolute; }
+  button { font:inherit; padding:6px 12px; border-radius:8px; border:1px solid #C7CDD1; background:#fff; cursor:pointer; }
+</style>
+<body>
+<div class="stage"><div class="scaleWrap" id="wrap"></div></div>
+<button id="toggle">toggle tucked/resting</button>
+<script>
+fetch("../extension/pet.js").then(r => r.text()).then(src => {
+  const grab = (fn) => src.match(new RegExp(`function ${fn}\\(\\)[\\s\\S]*?innerHTML = \`([\\s\\S]*?)\`;`))[1];
+  const bedBack = grab("buildBed");
+  const bedFront = grab("buildBedFront");
+  const rig = src.match(/wrap\.innerHTML = `([\s\S]*?)`;\s*return wrap;/)[1].replaceAll("${SIZE}", "108");
+  const BED_W = 152, SIZE = 108;
+
+  const wrap = document.getElementById("wrap");
+  const mk = (id, html, left, bottom, w, h, z) => {
+    const d = document.createElement("div");
+    d.id = id; d.className = "layer";
+    d.style.cssText += `left:${left}px; bottom:${bottom}px; width:${w}px; height:${h}px; z-index:${z};`;
+    d.innerHTML = html;
+    wrap.appendChild(d);
+    return d;
+  };
+  mk("cd-pet-bed", bedBack.replaceAll("${BED_W}", 152).replaceAll("${BED_H}", 52), 0, 0, 152, 52, 1);
+  const pet = mk("cd-pet", rig, (BED_W - SIZE) / 2, 12, SIZE, SIZE, 2);
+  const front = mk("cd-pet-bed-front", bedFront.replaceAll("${BED_W}", 152).replaceAll("${BED_H}", 52), 0, 0, 152, 52, 3);
+  pet.classList.add("cd-resting");
+  front.classList.add("cd-tucked");
+  document.getElementById("toggle").onclick = () => {
+    pet.classList.toggle("cd-resting");
+    front.classList.toggle("cd-tucked");
+  };
+});
+</script>
+</body>

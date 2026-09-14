@@ -1,0 +1,114 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Pets for Canvas — test bench</title>
+<style>
+  body { margin:0; font: 13px -apple-system, sans-serif; background:#F6F8FA; padding:24px; }
+  #stage { height: 320px; display:flex; align-items:flex-end; justify-content:center;
+           background:#fff; border:1px solid #D5DDE4; border-radius:12px; margin-bottom:16px; }
+  .controls { display:flex; flex-wrap:wrap; gap:8px; max-width:900px; margin:0 auto; }
+  button, select { font:inherit; padding:6px 12px; border-radius:8px; border:1px solid #C7CDD1;
+           background:#fff; cursor:pointer; }
+  button:hover { background:#E3EEF8; }
+  h3 { width:100%; margin:12px 0 2px; font-size:12px; text-transform:uppercase; color:#5C6B78; letter-spacing:.06em; }
+</style>
+<body>
+<div id="stage"></div>
+<div class="controls" id="controls"></div>
+<script>document.write(`<script src="../extension/collar-engine.js?v=${Date.now()}"><\/script>`);</script>
+<script>
+// THE test bench (Alec, 2026-09-07): every animal, every behavior, every idle, on localhost.
+//   bash tools/bench.sh capy   → http://127.0.0.1:8765/docs/pet-motion-bench.html?species=capy
+// Reads the SPECIES table, the rig template and the idle list straight out of pet.js, so it
+// cannot drift from the engine. Collars come from the real collar engine.
+fetch("../extension/pet.js", { cache: "no-store" }).then(r => r.text()).then(src => {
+  const m = src.match(/wrap\.innerHTML = `([\s\S]*?)`;\s*return wrap;/);
+  if (!m) { document.body.textContent = "could not extract rig from pet.js"; return; }
+  const species = {};
+  for (const sm of src.matchAll(/^\s*(\w+): \{ art: "([^"]+)", transform: "([^"]+)", scale: ([\d.]+), idles: "([^"]+)", ready: (true|false) \},?$/gm))
+    species[sm[1]] = { art: sm[2], transform: sm[3], idles: sm[5].split(","), ready: sm[6] === "true" };
+  const q = new URLSearchParams(location.search);
+  let cur = species[q.get("species")] ? q.get("species") : "pup";
+
+  const stage = document.getElementById("stage"), controls = document.getElementById("controls");
+  const st = document.createElement("style"); st.textContent = COLLAR_FX_CSS; document.head.appendChild(st);
+  let petDiv, stopMotes = null;
+  const add = (label, fn, parent = controls) => { const b = document.createElement("button"); b.textContent = label; b.onclick = fn; parent.appendChild(b); return b; };
+  const header = (t) => controls.insertAdjacentHTML("beforeend", `<h3>${t}</h3>`);
+
+  async function mount() {
+    stopMotes?.(); stage.innerHTML = ""; controls.innerHTML = "";
+    petDiv = document.createElement("div");
+    petDiv.id = "cd-pet"; petDiv.dataset.mood = "content"; petDiv.dataset.species = cur;
+    petDiv.style.cssText = "position:relative; width:260px; height:260px;";
+    petDiv.innerHTML = m[1].replaceAll("${SIZE}", "260");
+    stage.appendChild(petDiv);
+    const sp = species[cur];
+    const txt = await (await fetch("../extension/" + sp.art, { cache: "no-store" })).text();
+    const inner = txt.replace(/^[\s\S]*?<svg[^>]*>/, "").replace(/<\/svg>\s*$/, "");
+    petDiv.querySelector(".cd-facing").innerHTML = `<g transform="${sp.transform}">${inner}</g>`;
+    petDiv.classList.add("cd-imported");
+    petDiv.dataset.idles = sp.idles.join(",");
+
+    header("animal");
+    const sel = document.createElement("select");
+    for (const k of Object.keys(species)) { const o = document.createElement("option"); o.value = k; o.textContent = k + (species[k].ready ? "" : " (not ready)"); o.selected = k === cur; sel.appendChild(o); }
+    sel.onchange = () => { cur = sel.value; history.replaceState(null, "", "?species=" + cur); mount(); };
+    controls.appendChild(sel);
+    if (petDiv.querySelector(".cd-prop")) add("tangerine on/off", () => { petDiv.dataset.prop = petDiv.dataset.prop === "off" ? "on" : "off"; });
+    add("flip facing", () => { const g = petDiv.querySelector(".cd-facing"); g.style.transformOrigin = "50% 50%"; g.style.transform = g.style.transform ? "" : "scaleX(-1)"; });
+    const setMouth = (kind) => { for (const k of ["happy", "sad", "open"]) petDiv.querySelectorAll(`.cd-mouth-${k}`).forEach((e) => { e.style.opacity = k === kind ? "1" : "0"; }); };
+    // bench copy of pet.js tossProp(): same arc, same random direction/reach, lands on the stage floor
+    const tossOnBench = () => {
+      const prop = petDiv.querySelector(".cd-prop"); if (!prop || petDiv.dataset.prop === "off") return;
+      const head = prop.getBoundingClientRect(), st = stage.getBoundingClientRect();
+      petDiv.dataset.prop = "off";
+      const dir = Math.random() < 0.5 ? -1 : 1, reach = 60 + Math.random() * 200;
+      const x0 = head.left + head.width / 2 - st.left, y0 = head.top + head.height / 2 - st.top;
+      const x1 = Math.min(Math.max(20, x0 + dir * reach), st.width - 20), y1 = st.height - 16;
+      const el = document.createElement("div");
+      el.style.cssText = `position:absolute; width:30px; height:30px; left:${x0 - 15}px; top:${y0 - 15}px; filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))`;
+      el.innerHTML = `<svg viewBox="0 0 26 26" width="30" height="30"><circle cx="13" cy="14.5" r="9.5" fill="#F28C28" stroke="#3E1E0C" stroke-width="2"/><ellipse cx="9.5" cy="11" rx="2.6" ry="1.6" fill="#FFC27A" opacity=".85"/><path d="M13.5 5.5 Q17 1.5 21 3.5 Q17.5 7 14 6.5 Z" fill="#5FA85A" stroke="#3E1E0C" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
+      stage.style.position = "relative"; stage.appendChild(el);
+      const dx = x1 - x0, dy = y1 - y0, spin = dir * (240 + Math.random() * 240);
+      const arc = (t, h) => `translate(${dx * t}px, ${dy * t - h * Math.sin(Math.PI * Math.min(t, 1))}px) rotate(${spin * t}deg)`;
+      const keys = []; for (let i = 0; i <= 10; i++) keys.push({ transform: arc(i / 10, 60), offset: (i / 10) * 0.62, easing: "linear" });
+      keys.push({ transform: `translate(${dx * 1.06}px, ${dy - 26}px) rotate(${spin * 1.1}deg)`, offset: 0.76 });
+      keys.push({ transform: `translate(${dx * 1.1}px, ${dy}px) rotate(${spin * 1.18}deg)`, offset: 0.86 });
+      keys.push({ transform: `translate(${dx * 1.12}px, ${dy - 8}px) rotate(${spin * 1.2}deg)`, offset: 0.93 });
+      keys.push({ transform: `translate(${dx * 1.13}px, ${dy}px) rotate(${spin * 1.22}deg)`, offset: 1 });
+      el.animate(keys, { duration: 700 + Math.abs(dy) * 1.2, fill: "forwards" }).onfinish = () => setTimeout(() => el.remove(), 4000);
+    };
+    header("gait (toggle)");
+    for (const c of ["cd-walking", "cd-scurry", "cd-resting", "cd-stubborn"]) add(c.replace("cd-", ""), () => petDiv.classList.toggle(c));
+    header("one-shots");
+    for (const [c, ms] of [["cd-jumping", 950], ["cd-eating", 1250], ["cd-ultra", 2400], ["cd-poking", 1300]])
+      add(c.replace("cd-", ""), () => { petDiv.classList.add(c); setTimeout(() => petDiv.classList.remove(c), ms); });
+    header("idles");
+    // idles run like the engine's oneShot(): yawn opens the mouth for its duration, then the mood's mouth returns
+    for (const i of sp.idles) add(i, () => {
+      if (i === "snack") return tossOnBench();   // the toss: gravity to a random floor spot (the pickup walk needs the real page)
+      petDiv.classList.add(`cd-idle-${i}`); if (i === "yawn") setMouth("open");
+      const ms = { yawn: 2400 }[i] ?? 9000;
+      setTimeout(() => { petDiv.classList.remove(`cd-idle-${i}`); if (i === "yawn") setMouth(["sad", "hungry"].includes(petDiv.dataset.mood) ? "sad" : "happy"); }, ms);
+    });
+    header("mood");
+    // mirrors pet.js setMood(): mood attr for the CSS, mouth + lids swapped by hand like the engine does
+    for (const mo of ["content", "sad", "hungry", "sleeping"]) add(mo, () => {
+      petDiv.dataset.mood = mo;
+      setMouth(mo === "sad" || mo === "hungry" ? "sad" : "happy");
+      petDiv.querySelector(".cd-lids")?.setAttribute("opacity", mo === "sleeping" ? "1" : "0");
+    });
+    add("blink", () => { const l = petDiv.querySelector(".cd-lids"); l?.setAttribute("opacity", "1"); setTimeout(() => l?.setAttribute("opacity", "0"), 130); });
+    add("open mouth", () => { setMouth("open"); setTimeout(() => setMouth("happy"), 1200); });
+    header("collar (real engine, with effects)");
+    for (const d of COLLAR_DEFS) add(d.name, () => {
+      applyCollarDef(petDiv.querySelector("svg"), d, "bench");
+      stopMotes?.(); stage.querySelectorAll(".cd-cmote").forEach((x) => x.remove());
+      stage.style.position = "relative";
+      stopMotes = collarMoteLoop(d, stage, () => { const r = petDiv.getBoundingClientRect(), s = stage.getBoundingClientRect(); return { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height, dir: 1, moving: petDiv.classList.contains("cd-walking") }; });
+    });
+  }
+  mount();
+});
+</script>
+</body>

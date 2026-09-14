@@ -1,0 +1,20 @@
+<!doctype html><meta charset="utf-8"><title>tint compare</title>
+<body style="margin:0;background:#fff;font:12px -apple-system,sans-serif">
+<div style="display:flex;justify-content:center;gap:24px;padding:24px;background:#fff" id="row"></div>
+<script>
+const CANDS = [
+  ["#F7F6F6", "current (white)"],
+  ["#332C26", "near-black warm"],
+  ["#46362B", "dark espresso"],
+  ["#6E635A", "dark taupe"],
+];
+fetch("../extension/art/winston-recraft-2.svg").then(r=>r.text()).then(src=>{
+  const shrink = s => s.replace(/width="1024" height="1024"/, 'width="300" height="300"');
+  for (const [hex, label] of CANDS) {
+    const d = document.createElement("div");
+    d.style.textAlign = "center";
+    d.innerHTML = shrink(src.replaceAll("#F7F6F6", hex)) + `<b>${label}<br>${hex}</b>`;
+    document.getElementById("row").appendChild(d);
+  }
+});
+</script></body>

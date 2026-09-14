@@ -1,0 +1,36 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face { font-family: "Baloo 2"; src: url("ext/fonts/baloo2.woff2") format("woff2"); font-weight: 400 800; }
+@font-face { font-family: "Nunito"; src: url("ext/fonts/nunito.woff2") format("woff2"); font-weight: 400 900; }
+html,body{margin:0;width:1280px;height:800px;overflow:hidden}
+body{position:relative;background:radial-gradient(120% 110% at 30% 0%, #FFF3CE 0%, #FFD36B 48%, #F3B94A 100%);font-family:"Baloo 2",sans-serif}
+.ground{position:absolute;left:0;right:0;bottom:0;height:120px;background:linear-gradient(180deg,#F1B441,#E29A22)}
+.hill{position:absolute;left:-10%;width:120%;height:200px;bottom:70px;border-radius:50% 50% 0 0;background:#F7C95A;opacity:.9}
+.hill.b{left:30%;width:90%;bottom:90px;height:150px;background:#FBD97E}
+.head{position:absolute;left:40px;right:40px;top:30px;display:block}
+.head .mark{position:absolute;left:0;top:0}
+.head .tag{position:absolute;left:0;right:0;top:10px;text-align:center}
+.mark{color:#fff;text-shadow:0 4px 0 #B8791A,0 8px 20px rgba(120,80,10,.28);font-weight:800;font-size:52px;line-height:1}
+.mark small{font-size:26px;color:#7A4E08;text-shadow:0 2px 0 rgba(255,255,255,.35);margin-left:10px}
+.tag{font-family:"Nunito",sans-serif;font-weight:800;font-size:32px;color:#7A4E08;text-shadow:0 2px 0 rgba(255,255,255,.35)}
+.win{position:absolute;border-radius:20px;overflow:hidden;box-shadow:0 30px 60px rgba(120,80,10,.30),0 0 0 6px rgba(255,255,255,.6);background:#F1F3F9}
+.win iframe{width:360px;height:600px;border:0;display:block;background:#F1F3F9;transform-origin:top left}
+/* duo: two popups side by side, 1.12x */
+.duo .win{top:128px;width:403px;height:672px}
+.duo .win.a{left:214px}.duo .win.b{left:664px}
+.duo .win iframe{transform:scale(1.12)}
+/* page: one big browser window */
+.page .win{left:80px;top:120px;width:1120px;height:664px}
+.bar{height:36px;background:#F1F3F9;display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:1px solid #DDE3F0}
+.bar i{width:12px;height:12px;border-radius:50%;background:#D9DFEA;display:block}
+.shot{position:absolute;top:36px;left:0;right:0;bottom:0;overflow:hidden}
+.shot img{position:absolute;width:1318px;height:628px;left:0;top:0}
+</style></head><body>
+<div class="hill"></div><div class="hill b"></div><div class="ground"></div>
+<div class="head"><div class="mark">Pets<small>for Canvas</small></div><div class="tag" id="tag"></div></div>
+<div id="stage"></div>
+<script>
+const q=new URLSearchParams(location.search); document.getElementById('tag').textContent=q.get('t')||'';
+const st=document.getElementById('stage'); const layout=q.get('layout')||'duo'; document.body.classList.add(layout);
+if(layout==='duo'){ st.innerHTML=`<div class="win a"><iframe src="ext/shot.html?state=${q.get('a')}"></iframe></div><div class="win b"><iframe src="ext/shot.html?state=${q.get('b')}"></iframe></div>`; }
+else { st.innerHTML=`<div class="win"><div class="bar"><i></i><i></i><i></i></div><div class="shot"><img src="page.png"></div></div>`; }
+</script></body></html>

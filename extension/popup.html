@@ -1,0 +1,899 @@
+<!doctype html>
+<html>
+<head>
+<title>Pets for Canvas</title>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Baloo 2"; src: url("fonts/baloo2.woff2") format("woff2");
+    font-weight: 400 800; font-display: swap; }
+  @font-face { font-family: "Nunito"; src: url("fonts/nunito.woff2") format("woff2");
+    font-weight: 400 900; font-display: swap; }
+  :root {
+    --bg: #F3F6FB; --card: #FFFFFF; --card2: #EDF1F8;
+    --ink: #333B49; --muted: #8792A3; --line: #E1E7F0;
+    --brand: #6EA0F5; --brand2: #5B8DEF;
+    --gold: #FFB937; --gold2: #FF9F2E; --coral: #F26B5E; --mint: #2FA97E;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; } /* display:flex on ids must not beat the hidden attribute */
+  body { font: 600 13px/1.45 "Nunito", -apple-system, "Segoe UI", sans-serif; margin: 0; width: 360px;
+         background: linear-gradient(165deg, #EAF1FC, #F5F7FB 55%, #F1EFF9); color: var(--ink); overflow-x: hidden; }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px) scale(.96) } to { opacity: 1; transform: none } }
+  @keyframes spark { 0%,100% { opacity: 0; transform: translateY(4px) scale(.6) } 50% { opacity: .9; transform: translateY(-6px) scale(1) } }
+  @keyframes flick { 0%,100% { transform: scale(1) rotate(-2deg) } 30% { transform: scale(1.08) rotate(2deg) } 60% { transform: scale(.96) rotate(-1deg) } }
+  @keyframes shimmer { from { background-position: 180% 0 } to { background-position: -80% 0 } }
+  @keyframes bought { 30% { transform: scale(1.12) } }
+
+  /* ── hero ── */
+  .hero { position: relative; padding: 14px 16px 0; height: 212px; overflow: hidden; }
+  /* the habitat is the whole home background; #viewMain isolates so z-index:-1 paints under the cards */
+  #viewMain { position: relative; isolation: isolate; }
+  .habitat { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+  .habitat svg { display: block; width: 100%; height: 100%; }
+  .hero .sparkle { position: absolute; font-size: 11px; opacity: 0; animation: spark 3.2s ease-in-out infinite; }
+  #petStage { position: absolute; left: 50%; bottom: 2px; transform: translateX(-50%); width: 126px; height: 126px; }
+  #petStage svg { overflow: visible; }
+  #petStage .bigmoji { line-height: 126px; font-size: 86px; }
+  .bigmoji { font-size: 74px; text-align: center; line-height: 108px; }
+  .cycle {
+    position: absolute; right: 16px; bottom: 22px;
+    background: var(--card2); border: 1px solid #CBD5E6; border-bottom: 3px solid #B9C7DD;
+    border-radius: 12px; width: 34px; height: 40px; cursor: pointer;
+    font: 800 15px "Baloo 2", sans-serif; color: var(--brand2);
+    transition: transform .15s ease;
+  }
+  .cycle.back { right: auto; left: 16px; }
+  .equipbtn { display: block; margin: 8px auto 0; width: fit-content;
+    background: linear-gradient(180deg, #6EA0F5, #5B8DEF); color: #fff;
+    border: none; border-bottom: 4px solid #3E6CCB; border-radius: 13px;
+    padding: 6px 22px; cursor: pointer; font: 800 13px "Baloo 2", sans-serif;
+    animation: rise .3s cubic-bezier(.2,1.4,.4,1) both; }
+  .equipbtn:hover { filter: brightness(1.05); }
+  .equipbtn:active { transform: translateY(3px); border-bottom-width: 1px; }
+  .cycle:hover { transform: translateY(-1px); }
+  .cycle:active { transform: translateY(2px); border-bottom-width: 1px; }
+  @keyframes btnpop { 30% { transform: translateY(2px) scale(1.18) rotate(6deg) } 60% { transform: scale(.94) } 100% { transform: scale(1) } }
+  .cycle.pop { animation: btnpop .38s cubic-bezier(.2,1.6,.4,1); }
+
+  .claimbtn { background: linear-gradient(180deg, #F6C13C, #E39A1F); color: #fff; border: none; border-bottom: 4px solid #B8760F; border-radius: 12px;
+    padding: 7px 14px; font: 800 13px "Baloo 2", sans-serif; cursor: pointer; text-shadow: 0 1px 0 rgba(120,70,0,.35);
+    animation: shopglow 2.2s ease-in-out infinite; transition: transform .08s, border-bottom-width .08s; }
+  .claimbtn:active { transform: translateY(3px); border-bottom-width: 1px; }
+  #streakReward { position: fixed; inset: 0; z-index: 61; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 30%, #FFF3CE 0%, #FFD36B 45%, #F2B632 100%);
+    --cl: #FFF3CE; --cm: #FFD36B; --cdeep: rgba(255,201,90,.96); --crays: rgba(255,214,110,.55); }
+  #firstVisit { position: fixed; inset: 0; z-index: 62; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 26px;
+    background: linear-gradient(170deg, #FFF3CE 0%, #FFD36B 55%, #F3B94A 100%); text-align: center; }
+  #firstVisit[hidden] { display: none; }
+  #firstVisit .celebrate-flash { animation-duration: 1s; }
+  #firstVisit .celebrate-rays { animation: raysin 3s ease-out .2s forwards; }
+  .fv-moji { font-size: 54px; line-height: 1; position: relative; }
+  .fv-title { position: relative; font: 800 22px/1.15 "Baloo 2", sans-serif; color: #7A4E08; text-wrap: balance; }
+  .fv-text { position: relative; font: 700 13px/1.45 "Nunito", sans-serif; color: #7A4E08; max-width: 300px; }
+  .fv-strong { font-weight: 800; background: rgba(255,255,255,.55); border-radius: 12px; padding: 8px 12px; }
+  #firstVisit .sr-btn { position: relative; margin-top: 6px; }
+  #streakReward .celebrate-flash { animation-duration: 1s; }
+  #streakReward .celebrate-rays { animation: raysin 3s ease-out .2s forwards; }
+  .sr-coin { position: relative; opacity: 0; animation: champ 1s cubic-bezier(.2,1.5,.4,1) .25s forwards; filter: drop-shadow(0 8px 16px rgba(120,80,10,.35)); }
+  .sr-amount { position: relative; font: 800 44px/1 "Baloo 2", sans-serif; color: #7A4E08; text-shadow: 0 2px 0 #fff7dd, 0 4px 14px rgba(120,80,10,.25); margin-top: 6px;
+    opacity: 0; animation: champ .9s cubic-bezier(.2,1.5,.4,1) .6s forwards; font-variant-numeric: tabular-nums; }
+  .sr-text { position: relative; margin-top: 8px; font: 800 15px/1.3 "Baloo 2", sans-serif; color: #8A5B15; opacity: 0; animation: champ .9s cubic-bezier(.2,1.5,.4,1) 1.1s forwards; }
+  .sr-sub { position: relative; margin-top: 2px; font: 800 12px/1.3 "Nunito", sans-serif; color: #9A6B1A; opacity: 0; animation: champ .9s cubic-bezier(.2,1.5,.4,1) 1.3s forwards; }
+  .sr-btn { position: relative; margin-top: 18px; background: #7A4E08; color: #fff; border: none; border-bottom: 4px solid #4E3005; border-radius: 13px; padding: 9px 22px;
+    font: 800 14px "Baloo 2", sans-serif; cursor: pointer; opacity: 0; animation: champ .8s cubic-bezier(.2,1.5,.4,1) 1.7s forwards; }
+  .sr-btn:active { transform: translateY(3px); border-bottom-width: 1px; }
+  #streakReward.out { transition: opacity .45s; opacity: 0; }
+  body.boot #viewMain, body.boot #viewShop, body.boot #viewWardrobe { visibility: hidden; }
+  #welcome { position: fixed; inset: 0; z-index: 57; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;
+    background: radial-gradient(circle at 50% 30%, #FFF3CE 0%, #FFD36B 45%, #F2B632 100%);
+    --cl: #FFF3CE; --cm: #FFD36B; --cdeep: rgba(255,201,90,.96); --crays: rgba(255,214,110,.55); }
+  #welcome .celebrate-flash { animation-duration: 1.2s; }
+  #welcome .celebrate-rays { animation: raysin 3s ease-out .3s forwards; }
+  .wl-title { position: relative; font: 800 38px/1.1 "Baloo 2", sans-serif; color: #7A4E08; text-shadow: 0 2px 0 #fff7dd, 0 4px 14px rgba(120,80,10,.25);
+    opacity: 0; animation: champ 1.2s cubic-bezier(.2,1.5,.4,1) .35s forwards; }
+  .wl-sub { position: relative; margin-top: 8px; font: 800 14px/1.3 "Nunito", sans-serif; color: #8A5B15; opacity: 0; animation: champ 1s cubic-bezier(.2,1.5,.4,1) .9s forwards; }
+  .wl-tap { position: absolute; bottom: 28px; font: 800 11px/1 "Baloo 2", sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #9A6B1A; opacity: 0;
+    animation: champ .8s ease-out 1.6s forwards, br-tapblink 1.6s ease-in-out 2.4s infinite; }
+  #welcome.out { transition: opacity .45s ease; opacity: 0; }
+  #adoptModal { position: fixed; inset: 0; z-index: 56; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 30%, #FFF3CE 0%, #FFD36B 45%, #F2B632 100%); }
+  .adopt-card { width: 300px; padding: 16px 14px 14px; text-align: center; }
+  .starters { display: flex; gap: 10px; justify-content: center; margin-top: 8px; }
+  .starter { flex: 1; background: var(--card2); border: 1px solid var(--line); border-radius: 14px; padding: 8px 6px 10px; }
+  .sstage { height: 104px; display: flex; align-items: flex-end; justify-content: center; }
+  .sstage svg { overflow: visible; }
+  .pickbtn { margin-top: 6px; width: 100%; background: linear-gradient(180deg, #6EA0F5, #5B8DEF); color: #fff; border: none;
+    border-bottom: 4px solid #3E6CCB; border-radius: 13px; padding: 8px; font: 800 14px/1.2 "Baloo 2", sans-serif; cursor: pointer;
+    transition: transform .08s, border-bottom-width .08s; }
+  .pickbtn:active { transform: translateY(3px); border-bottom-width: 1px; }
+  #confirmMoji svg, #celebratePet svg { overflow: visible; }
+  #confirmModal { position: fixed; inset: 0; z-index: 55; display: flex; align-items: center;
+    justify-content: center; background: rgba(30,36,48,.55); }
+  .confirm-card { background: #fff; border-radius: 18px; border-bottom: 5px solid #D8DFEA;
+    padding: 18px 22px; text-align: center; width: 250px; animation: rise .3s cubic-bezier(.2,1.4,.4,1); }
+  .confirm-card .cmoji { font-size: 44px; }
+  .confirm-card h3 { font: 800 18px/1.3 "Baloo 2", sans-serif; margin: 6px 0 2px; }
+  .confirm-card p { margin: 0 0 12px; font-size: 12px; color: var(--muted); font-weight: 800; }
+  .confirm-card .price { color: #8A5B15; font: 800 15px "Baloo 2", sans-serif; }
+  .confirm-row { display: flex; gap: 8px; }
+  .confirm-row button { flex: 1; border-radius: 12px; padding: 9px 0; cursor: pointer;
+    font: 800 14px "Baloo 2", sans-serif; }
+  #confirmNo { background: var(--card2); color: var(--muted); border: 1px solid #CBD5E6; border-bottom: 3px solid #B9C7DD; }
+  #confirmNo:active { transform: translateY(2px); border-bottom-width: 1px; }
+  #confirmYes { background: linear-gradient(180deg, #5A4630, #3D2E1C); color: #FFD98C;
+    border: none; border-bottom: 4px solid #241A0E; letter-spacing: .02em; }
+  #confirmYes:active { transform: translateY(3px); border-bottom-width: 1px; }
+
+  #siteModal { position: fixed; inset: 0; z-index: 56; display: flex; align-items: center; justify-content: center; background: rgba(30,36,48,.55); }
+  #siteModal .confirm-card { width: 270px; }
+  #siteModal p { word-break: break-all; }
+  #siteNo { background: var(--card2); color: var(--muted); border: 1px solid #CBD5E6; border-bottom: 3px solid #B9C7DD; }
+  #siteNo:active { transform: translateY(2px); border-bottom-width: 1px; }
+  #siteYes { background: linear-gradient(180deg, #6EA0F5, #5B8DEF); color: #fff; border: none; border-bottom: 4px solid #3E6CCB; }
+  #siteYes:active { transform: translateY(3px); border-bottom-width: 1px; }
+
+  /* ── adoption ceremony ── */
+  #celebrate { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; pointer-events: none;
+    background: var(--cm); /* opaque ground so nothing shows through under the flash */
+    --cl: #FFF3CE; --cm: #FFD36B; --cdeep: rgba(255,201,90,.94); --cdark: #E89B22;
+    --ct: #7A4E08; --crays: rgba(255,214,110,.55); }
+  #celebrate.r-common  { --cl:#FFFFFF; --cm:#D9E0E9; --cdeep:rgba(168,180,196,.92); --cdark:#98A6B8; --ct:#5C6878; --crays:rgba(190,200,214,.6); }
+  #celebrate.r-uncommon{ --cl:#EAFBEF; --cm:#7BD89A; --cdeep:rgba(66,178,104,.92); --cdark:#2E9257; --ct:#1F7A44; --crays:rgba(120,214,150,.55); }
+  #celebrate.r-rare    { --cl:#EAF3FF; --cm:#7FB0FF; --cdeep:rgba(76,135,240,.93); --cdark:#2B62C9; --ct:#2C5FC4; --crays:rgba(130,180,255,.55); }
+  #celebrate.r-epic    { --cl:#F6EDFF; --cm:#C08BF0; --cdeep:rgba(155,85,225,.93); --cdark:#8A3ED8; --ct:#7A34C8; --crays:rgba(190,140,245,.55); }
+  #celebrate.r-legendary{ --cl:#FFF3CE; --cm:#FFD36B; --cdeep:rgba(255,201,90,.94); --cdark:#E89B22; --ct:#7A4E08; --crays:rgba(255,214,110,.55); }
+  .celebrate-flash { position: absolute; inset: 0; opacity: 0;
+    background: radial-gradient(circle at 50% 42%, var(--cl) 0%, var(--cm) 45%, var(--cdeep) 100%);
+    animation: goldflash 3.2s ease-out forwards; }
+  @keyframes goldflash { 0% { opacity: 0 } 10% { opacity: .85 } 34% { opacity: .85 }
+    38% { opacity: 1 } 100% { opacity: .94 } }
+  /* ── box reveal: every phase is timed off --t, the tier's tension time ── */
+  #boxReveal { position: fixed; inset: 0; z-index: 62; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(28,32,44,.72); backdrop-filter: blur(4px); --t: 1.4s;
+    --bx: #F0A24B; --bx2: #F7B764; --bxd: #7A4E08; --rib: #E85D6A;
+    --cl: #FFF3CE; --cm: #FFD36B; --cdeep: rgba(255,201,90,.94); --ct: #FFE7A8; --crays: rgba(255,214,110,.55); }
+  #boxReveal.r-common  { --cl:#FFFFFF; --cm:#D9E0E9; --cdeep:rgba(168,180,196,.92); --ct:#EEF2F7; --crays:rgba(190,200,214,.6); }
+  #boxReveal.r-uncommon{ --cl:#EAFBEF; --cm:#7BD89A; --cdeep:rgba(66,178,104,.92); --ct:#D7F7E2; --crays:rgba(120,214,150,.55); }
+  #boxReveal.r-rare    { --cl:#EAF3FF; --cm:#7FB0FF; --cdeep:rgba(76,135,240,.93); --ct:#DCE9FF; --crays:rgba(130,180,255,.55); }
+  #boxReveal.r-epic    { --cl:#F6EDFF; --cm:#C08BF0; --cdeep:rgba(155,85,225,.93); --ct:#EBD9FF; --crays:rgba(190,140,245,.55); }
+  #boxReveal.r-legendary{ --cl:#FFF3CE; --cm:#FFD36B; --cdeep:rgba(255,201,90,.94); --ct:#FFE7A8; --crays:rgba(255,214,110,.55); }
+  #boxReveal.out { transition: opacity .4s; opacity: 0; }
+  .br-flash { position: absolute; inset: 0; opacity: 0; background: radial-gradient(circle at 50% 46%, var(--cl) 0%, var(--cm) 40%, var(--cdeep) 100%);
+    animation: br-flash .9s ease-out calc(var(--t) + .35s) forwards; }
+  @keyframes br-flash { 0% { opacity: 0 } 12% { opacity: 1 } 100% { opacity: .55 } }
+  .br-rays { position: absolute; width: 340px; height: 340px; opacity: 0; border-radius: 50%;
+    background: repeating-conic-gradient(var(--crays) 0deg 9deg, transparent 9deg 24deg);
+    -webkit-mask-image: radial-gradient(circle, black 30%, transparent 68%); mask-image: radial-gradient(circle, black 30%, transparent 68%);
+    animation: raysin 2.4s ease-out calc(var(--t) + .4s) forwards; }
+  #boxReveal { cursor: pointer; } #boxReveal.opening { cursor: default; }
+  .br-box { position: relative; width: 120px; height: 126px; margin-bottom: 10px; transition: scale .12s cubic-bezier(.3,1.4,.5,1);
+    animation: br-drop .55s cubic-bezier(.2,1.4,.4,1) both, br-idle 2.4s ease-in-out .6s infinite; }
+  .br-box.press { scale: .9; }
+  @keyframes br-idle { 0%,100% { transform: rotate(-2deg) } 50% { transform: rotate(2deg) translateY(-2px) } }
+  #boxReveal.opening .br-box { animation: br-shake var(--t) ease-in both; cursor: default; }
+  #boxReveal.opening.lift .br-box { animation: br-shake var(--t) ease-in both, br-lift var(--t) ease-in both; }
+  @keyframes br-lift { 0%,40% { translate: 0 0 } 100% { translate: 0 -26px } }
+  .br-tap { font: 800 13px/1 "Baloo 2", sans-serif; color: rgba(255,255,255,.8); letter-spacing: .04em; text-transform: uppercase; margin-bottom: 14px;
+    animation: br-tapblink 1.6s ease-in-out infinite; }
+  @keyframes br-tapblink { 50% { opacity: .35 } }
+  #boxReveal.opening .br-tap { visibility: hidden; }
+  .br-beam { position: absolute; left: 50%; bottom: 60px; width: 26px; height: 0; transform: translateX(-50%); border-radius: 13px 13px 0 0; opacity: 0;
+    background: linear-gradient(180deg, transparent, var(--cm) 40%, var(--cl)); filter: blur(4px); }
+  #boxReveal.opening .br-beam { animation: br-beam var(--t) ease-in both; }
+  @keyframes br-beam { 0% { height: 0; opacity: 0 } 35% { opacity: .5; height: 40px } 100% { opacity: 1; height: 220px; width: 60px } }
+  .br-stage { position: relative; width: 132px; height: 132px; margin-top: -60px; opacity: 0; filter: drop-shadow(0 10px 18px rgba(0,0,0,.35)); z-index: 3; }
+  .br-stage svg { overflow: visible; }
+  #boxReveal.opening .br-stage { animation: br-rise .6s cubic-bezier(.2,1.5,.4,1) calc(var(--t) + .55s) forwards; }
+  .br-perk { margin-top: 8px; font: 800 12.5px/1.35 "Nunito", sans-serif; color: var(--ct); background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.3);
+    border-radius: 10px; padding: 5px 12px; opacity: 0; }
+  #boxReveal.opening .br-perk:not(:empty) { animation: champ .9s cubic-bezier(.2,1.5,.4,1) calc(var(--t) + 2.05s) forwards; }
+  .br-flash, .br-rays, .br-lid, .br-leak, .br-name, .br-chip, .br-actions, .br-spark { animation-play-state: paused; }
+  #boxReveal.opening .br-flash, #boxReveal.opening .br-rays, #boxReveal.opening .br-lid, #boxReveal.opening .br-leak,
+  #boxReveal.opening .br-name, #boxReveal.opening .br-chip, #boxReveal.opening .br-actions, #boxReveal.opening .br-spark { animation-play-state: running; }
+  .br-body { position: absolute; left: 0; top: 36px; width: 120px; height: 90px; }
+  #boxReveal.opening .br-body { animation: br-bodyout .5s ease-in calc(var(--t) + .75s) forwards; }
+  #boxReveal.opening .br-leak { animation: br-leak var(--t) ease-in .5s forwards, br-bodyout .3s ease-in calc(var(--t) + .6s) forwards; }
+  @keyframes br-bodyout { to { opacity: 0; transform: translateY(30px) scale(.7) } }
+  .br-lid { position: absolute; left: 0; top: 0; width: 120px; height: 40px; z-index: 2; transform-origin: 70% 90%;
+    animation: br-lid .7s cubic-bezier(.3,.6,.4,1) calc(var(--t) + .5s) forwards; }
+  .br-leak { position: absolute; left: 12px; right: 12px; top: 36px; height: 6px; border-radius: 6px; background: var(--cm); opacity: 0;
+    box-shadow: 0 0 10px 3px var(--cm), 0 0 24px 8px var(--cdeep); animation: br-leak var(--t) ease-in .5s forwards; }
+  @keyframes br-drop { from { transform: translateY(-140px) scale(.7); opacity: 0 } to { transform: none; opacity: 1 } }
+  @keyframes br-shake {
+    0% { transform: rotate(0) } 20% { transform: rotate(-3deg) translateX(-1px) } 35% { transform: rotate(3deg) translateX(1px) }
+    50% { transform: rotate(-6deg) translateX(-3px) scale(1.02) } 62% { transform: rotate(6deg) translateX(3px) scale(1.03) }
+    74% { transform: rotate(-9deg) translateX(-5px) scale(1.05) } 84% { transform: rotate(9deg) translateX(5px) scale(1.07) }
+    92% { transform: rotate(-4deg) scale(1.1) } 100% { transform: rotate(0) scale(1.12) } }
+  @keyframes br-leak { 0% { opacity: 0 } 60% { opacity: .35 } 100% { opacity: 1 } }
+  @keyframes br-lid { 0% { transform: translateY(0) rotate(0); opacity: 1 } 100% { transform: translateY(-160px) rotate(-38deg); opacity: 0 } }
+  @keyframes br-rise { 0% { opacity: 0; transform: translateY(40px) scale(.3) } 60% { opacity: 1; transform: translateY(-16px) scale(1.15) } 100% { opacity: 1; transform: translateY(-10px) scale(1) } }
+  .br-name { font: 800 24px/1.2 "Baloo 2", sans-serif; color: var(--ct); text-shadow: 0 2px 10px rgba(0,0,0,.35); margin-top: 4px; opacity: 0;
+    animation: champ .9s cubic-bezier(.2,1.5,.4,1) calc(var(--t) + 1.5s) forwards; }
+  .br-chip { margin-top: 8px; opacity: 0; transform: scale(2); animation: br-stamp .45s cubic-bezier(.2,1.6,.4,1) calc(var(--t) + 1.8s) forwards; font-size: 11px; padding: 3px 12px; }
+  @keyframes br-stamp { 0% { opacity: 0; transform: scale(2.4) rotate(-8deg) } 100% { opacity: 1; transform: scale(1) rotate(-4deg) } }
+  .br-actions { display: flex; gap: 8px; margin-top: 16px; opacity: 0; animation: champ .8s cubic-bezier(.2,1.5,.4,1) calc(var(--t) + 2.3s) forwards; }
+  .br-actions .save { background: linear-gradient(180deg, #6EA0F5, #5B8DEF); color: #fff; border: none; border-bottom: 4px solid #3E6CCB; border-radius: 13px;
+    padding: 8px 20px; font: 800 14px "Baloo 2", sans-serif; cursor: pointer; }
+  .br-actions .skip { background: rgba(255,255,255,.14); color: #fff; border: 1px solid rgba(255,255,255,.35); border-radius: 13px; padding: 8px 16px; font: 800 13px "Baloo 2", sans-serif; cursor: pointer; }
+  .br-actions button:active { transform: translateY(2px); }
+  .br-spark { position: absolute; left: 50%; top: 46%; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; opacity: 0;
+    animation: br-spark 1.3s ease-out calc(var(--t) + .45s) both; }
+  @keyframes br-spark { 0% { opacity: 0; transform: translate(0,0) scale(.4) } 15% { opacity: 1 } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0) } }
+  #celebrate { transition: opacity .45s ease; }
+  #celebrate.out { opacity: 0; }
+  .celebrate-orb { position: absolute; width: 74px; height: 74px; border-radius: 50%;
+    background: radial-gradient(circle at 34% 30%, var(--cl), var(--cm) 55%, var(--cdark));
+    box-shadow: 0 4px 14px rgba(60,60,70,.35), inset 0 -8px 14px rgba(0,0,0,.2);
+    animation: orbwobble 1.15s ease-in-out forwards, orbpop .3s ease-in 1.15s forwards; }
+  @keyframes orbwobble {
+    0% { transform: scale(.4) rotate(0); opacity: 0 }
+    18% { transform: scale(1) rotate(0); opacity: 1 }
+    32% { transform: scale(1) rotate(-7deg) translateX(-3px) }
+    46% { transform: scale(1.02) rotate(7deg) translateX(3px) }
+    58% { transform: scale(1.02) rotate(-9deg) translateX(-4px) }
+    70% { transform: scale(1.05) rotate(9deg) translateX(4px) }
+    80% { transform: scale(1.08) rotate(-11deg) translateX(-5px) }
+    90% { transform: scale(1.12) rotate(11deg) translateX(5px) }
+    100% { transform: scale(1.18) rotate(0) }
+  }
+  @keyframes orbpop { 0% { transform: scale(1.18); opacity: 1 } 100% { transform: scale(2.6); opacity: 0 } }
+  .celebrate-rays { position: absolute; width: 300px; height: 300px; opacity: 0; border-radius: 50%;
+    background: repeating-conic-gradient(var(--crays) 0deg 9deg, transparent 9deg 24deg);
+    -webkit-mask-image: radial-gradient(circle, black 30%, transparent 68%);
+    mask-image: radial-gradient(circle, black 30%, transparent 68%);
+    animation: raysin 2s ease-out 1.18s forwards; }
+  @keyframes raysin { 0% { opacity: 0; transform: rotate(0) scale(.6) }
+    20% { opacity: 1 } 100% { opacity: 0; transform: rotate(40deg) scale(1.15) } }
+  .celebrate-pet { position: relative; font-size: 112px; line-height: 1; opacity: 0;
+    filter: drop-shadow(0 6px 10px rgba(120,80,10,.35));
+    animation: champ 1.9s cubic-bezier(.2,1.5,.4,1) 1.22s forwards; }
+  @keyframes champ {
+    0% { transform: scale(.15) rotate(-12deg); opacity: 0 }
+    22% { transform: scale(1.28) rotate(5deg); opacity: 1 }
+    36% { transform: scale(.94) rotate(-2deg) }
+    100% { transform: scale(1) rotate(0); opacity: 1 }
+  }
+  .celebrate-text { position: relative; font: 800 24px/1.2 "Baloo 2", sans-serif; color: var(--ct);
+    margin-top: 8px; opacity: 0; animation: champ 1.4s cubic-bezier(.2,1.5,.4,1) 1.45s forwards; }
+  .celebrate-name { position: relative; display: flex; align-items: center; gap: 7px; margin-top: 12px;
+    pointer-events: auto; opacity: 0; animation: champ 1s cubic-bezier(.2,1.5,.4,1) 2.1s forwards; }
+  .celebrate-name input { width: 130px; border: none; border-radius: 12px; padding: 8px 12px;
+    font: 800 15px "Baloo 2", sans-serif; color: var(--ct); text-align: center; background: rgba(255,255,255,.92);
+    box-shadow: inset 0 2px 4px rgba(40,40,50,.2); outline: none; }
+  .celebrate-name .save { background: var(--ct); color: #fff;
+    border: none; border-bottom: 3px solid rgba(0,0,0,.35); border-radius: 12px; padding: 8px 14px;
+    font: 800 14px "Baloo 2", sans-serif; cursor: pointer; }
+  .celebrate-name .save:active { transform: translateY(2px); border-bottom-width: 1px; }
+  .celebrate-name .skip { background: none; border: none; color: var(--ct); opacity: .7;
+    font: 800 11px "Nunito", sans-serif; cursor: pointer; text-decoration: underline; }
+  .petname { position: absolute; top: 12px; left: 16px; font: 800 19px/1.2 "Baloo 2", sans-serif; letter-spacing: .01em; display: flex; align-items: center; gap: 6px; }
+  .heropencil { font-size: 12px; opacity: .5; } .petname:hover .heropencil { opacity: .9; }
+  .herorename { position: absolute; top: 42px; left: 16px; z-index: 3; margin: 0; justify-content: flex-start; }
+  .moodchip {
+    position: absolute; top: 38px; left: 16px; display: inline-flex; align-items: center; gap: 5px;
+    background: #fff; border: 1px solid var(--line); border-bottom: 2px solid var(--line);
+    border-radius: 11px; padding: 2px 9px; font-size: 11.5px; font-weight: 800; color: var(--ink);
+    transition: background .3s ease, color .3s ease, border-color .3s ease;
+  }
+  /* ── treat shelf ── */
+  .treats { display: flex; align-items: center; gap: 8px; margin: 10px 14px 0; }
+  .treats .treat { display: inline-flex; align-items: center; gap: 6px; background: #fff;
+    border: 1px solid var(--line); border-bottom: 3px solid var(--line); border-radius: 12px;
+    padding: 5px 11px; cursor: pointer; font: 800 13px "Baloo 2", sans-serif; color: var(--ink); }
+  .treats .treat:active { transform: translateY(2px); border-bottom-width: 1px; }
+  .treats .treat[disabled] { opacity: .45; cursor: default; }
+  .treats .treat.rare {
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, #FFF3CE 0%, #FFD36B 55%, #F3B94A 100%);
+    border-color: #D8A032; border-bottom-color: #B87F1D;
+    color: #7A4E08;
+    animation: legend-arrive .5s cubic-bezier(.34,1.5,.5,1) 1, legend-pulse 2.6s ease-in-out .5s infinite;
+  }
+  .treats .treat.rare b { color: #7A4E08; }
+  .treats .treat.rare::after { content: ""; position: absolute; top: -20%; bottom: -20%;
+    left: -30%; width: 26%; transform: skewX(-18deg);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.85), transparent);
+    animation: legend-shimmer 2.8s ease-in-out 1s infinite; }
+  .treats .treat.rare .spark { position: absolute; font-size: 7px; color: #FFF6DC;
+    animation: legend-spark 2.2s ease-in-out infinite; }
+  .treats .treat.rare .spark:nth-of-type(2) { top: 3px; right: 5px; animation-delay: 1.1s; }
+  .treats .treat.rare .spark:nth-of-type(1) { bottom: 3px; left: 5px; }
+  @keyframes legend-shimmer { 0%, 55%, 100% { left: -30% } 25% { left: 110% } }
+  @keyframes legend-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,201,90,.55) } 50% { box-shadow: 0 0 9px 2px rgba(255,201,90,.55) } }
+  @keyframes legend-spark { 0%, 100% { opacity: 0; transform: scale(.6) } 50% { opacity: 1; transform: scale(1.15) } }
+  @keyframes legend-arrive { 0% { transform: scale(.4); opacity: 0 } 70% { transform: scale(1.12) } 100% { transform: scale(1); opacity: 1 } }
+  .treats .hint { font-size: 10.5px; color: var(--muted); line-height: 1.35; flex: 1; }
+  .petswitch { position: absolute; top: 14px; right: 14px; display: flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--muted); cursor: pointer; z-index: 2; }
+  .petswitch .track { width: 36px; height: 20px; border-radius: 12px; background: #D4DEED;
+    position: relative; transition: background .25s ease; }
+  .petswitch .knob { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2);
+    transition: transform .25s cubic-bezier(.2,1.4,.4,1); }
+  .petswitch input { display: none; }
+  .petswitch input:checked + .track { background: var(--brand2); }
+  .petswitch input:checked + .track .knob { transform: translateX(16px); }
+  .coinpill {
+    position: absolute; top: 44px; right: 14px; border: 1px solid #EFD9A4; border-bottom: 4px solid #E5C377;
+    background: linear-gradient(180deg, #FFF7E2, #FFEDC2);
+    border-radius: 16px; padding: 4px 14px 4px 10px; font: 800 20px/1.3 "Baloo 2", sans-serif; color: #8A5B15;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .coinpill .cd-coin { filter: drop-shadow(0 1px 1px rgba(120,70,0,.3)); }
+  .coinpill.bump { animation: coinbump .6s cubic-bezier(.34,1.56,.64,1); }
+  .coinpill.bump .cd-coin-shine { opacity: .55; animation: cd-coin-shine .6s ease-out .1s both; }
+  @keyframes coinbump { 35% { transform: scale(1.14) rotate(-3deg) } 70% { transform: scale(.97) } }
+  @keyframes cd-coin-shine { 0% { transform: translateX(0) skewX(-22deg) } 100% { transform: translateX(46px) skewX(-22deg) } }
+  .cd-coin { vertical-align: -0.18em; }
+
+  /* ── wardrobe button ── */
+  .wardrobebtn {
+    margin-left: auto; background: #fff; color: var(--ink); border: 1px solid var(--line); border-bottom: 3px solid #CBD5E6;
+    border-radius: 12px; padding: 5px 14px; font: 800 13px/1.4 "Baloo 2", sans-serif; cursor: pointer;
+    transition: transform .08s, border-bottom-width .08s; animation: rise .45s .1s cubic-bezier(.2,1.4,.4,1) backwards;
+  }
+  .wardrobebtn:active { transform: translateY(3px); border-bottom-width: 1px; }
+  .friendsbtn { display: block; margin: 0 14px 10px; width: calc(100% - 28px); background: #fff; color: var(--ink); border: 1px solid var(--line);
+    border-bottom: 4px solid #CBD5E6; border-radius: 13px; padding: 9px 14px; font: 800 14px/1.3 "Baloo 2", sans-serif; cursor: pointer;
+    transition: transform .08s, border-bottom-width .08s; animation: rise .45s .12s cubic-bezier(.2,1.4,.4,1) backwards; }
+  .friendsbtn:active { transform: translateY(3px); border-bottom-width: 1px; }
+  #viewFriends { min-height: 100vh; padding-bottom: 12px; background: #E6EEFB; }
+  #viewFriends .setrow { display: flex; align-items: center; justify-content: space-between; font-weight: 800; }
+  #viewFriends .hint { margin-top: 6px; }
+
+  /* ── wardrobe view ── */
+  #viewWardrobe { min-height: 100vh; padding-bottom: 12px;
+    background: linear-gradient(168deg, #EEF3FD 0%, #F5F1FB 60%, #FDF3EA 100%); }
+  .wstage { margin: 6px 12px 0; height: 168px; border-radius: 16px; border: 1px solid var(--line); position: relative;
+    overflow: hidden; isolation: isolate; background: #E6EEFB; }
+  #wardrobeStage { position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); width: 120px; height: 120px; }
+  #wardrobeStage svg { overflow: visible; }
+  .wsection { margin: 10px 12px 0; background: var(--card); border: 1px solid var(--line); border-bottom: 3px solid var(--line);
+    border-radius: 14px; padding: 10px 12px 12px; }
+  .wsection h4 { margin: 0 0 8px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .wsection .empty { font-size: 12px; color: var(--muted); font-weight: 800; padding: 4px 0; }
+  .wperk { margin: 8px 12px 0; text-align: center; font: 800 12px/1.3 "Nunito", sans-serif; color: #8A5B15; }
+  .wperk:empty { display: none; }
+  .cgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .ccard { position: relative; background: #fff; border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 14px; padding: 8px 6px 8px;
+    text-align: center; cursor: pointer; transition: transform .08s, border-bottom-width .08s; }
+  .ccard:hover { transform: translateY(-2px); } .ccard:active { transform: translateY(2px); border-bottom-width: 2px; }
+  .ccard .cglyph { height: 58px; display: flex; align-items: center; justify-content: center; }
+  .ccard .cname { font: 800 12.5px/1.2 "Baloo 2", sans-serif; margin-top: 4px; }
+  .ccard .raritychip { margin-top: 4px; font-size: 9px; padding: 1px 7px; }
+  .ccard .cwearing { position: absolute; top: 6px; right: 6px; font: 800 9px/1 "Baloo 2", sans-serif; color: #fff; background: var(--brand2); border-radius: 6px; padding: 3px 6px; }
+  .ccard.wearing { box-shadow: 0 0 0 2px #CFE0FA; }
+  .rc-frame-common { border-color: #C9D2DF; } .rc-frame-uncommon { border-color: #7CCF9B; } .rc-frame-rare { border-color: #7FB0FF; }
+  .rc-frame-epic { border-color: #C08BF0; background: linear-gradient(180deg, #FBF6FF, #fff); }
+  .rc-frame-legendary { border-color: #F2B632; background: linear-gradient(180deg, #FFF6DC, #fff); box-shadow: 0 0 14px 2px rgba(246,193,60,.35); }
+  .rc-frame-legendary.wearing { box-shadow: 0 0 0 2px #FFE2A0, 0 0 16px 3px rgba(246,193,60,.45); }
+  .ccard .cfoot { margin-top: 5px; font: 800 11px/1 "Baloo 2", sans-serif; color: #8A5B15; }
+  .ccard.locked .cglyph { filter: grayscale(.35) opacity(.85); }
+  .ccard.cantafford { cursor: default; opacity: .6; }
+  .ccard.bought { animation: bought .5s cubic-bezier(.2,1.6,.4,1); }
+  /* the popup window grows to fit the document and never shrinks back, so nothing may be wider than 360px */
+  /* html carries the same ground as body so nothing white shows behind a view */
+  html { max-width: 360px; overflow-x: hidden; overscroll-behavior: none; background: #F1F3F9; }
+  /* body must not be a scroll container: a nested scroller with overscroll-behavior cuts wheel chaining to html, the only scroller */
+  body { max-width: 360px; overflow: visible; overscroll-behavior: auto; }
+  #viewMain { min-height: 100vh; }
+  #viewMain, #viewShop, #viewWardrobe { max-width: 360px; overflow-x: hidden; }
+  .wshoplink { display: block; margin: 12px 12px 0; width: calc(100% - 24px); background: linear-gradient(180deg, #F6C13C, #E39A1F); color: #fff;
+    border: none; border-bottom: 4px solid #B8760F; border-radius: 13px; padding: 10px; font: 800 14px/1.2 "Baloo 2", sans-serif;
+    cursor: pointer; text-shadow: 0 1px 0 rgba(120,70,0,.35); transition: transform .08s, border-bottom-width .08s; }
+  .wshoplink:active { transform: translateY(3px); border-bottom-width: 1px; }
+
+  /* ── streak ── */
+  .streak {
+    margin: 16px 14px 12px; padding: 12px 14px; border-radius: 16px;
+    background: linear-gradient(135deg, #FFF4DA, #FFFFFF 70%);
+    border: 1px solid #F3DEA8; border-bottom: 3px solid #EACB8A;
+    display: flex; align-items: center; gap: 12px;
+    animation: rise .45s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .flame { font-size: 30px; filter: drop-shadow(0 0 8px rgba(255,159,46,.6)); animation: flick 1.6s ease-in-out infinite; transform-origin: 50% 85%; }
+  .flame.cold { filter: none; animation: none; opacity: .75; }
+  .streak b { font: 800 24px/1.05 "Baloo 2", sans-serif; display: block;
+    background: linear-gradient(180deg, #FFB937, #F07E1B);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .streak small { color: var(--muted); display: block; }
+  .bestbadge {
+    margin-left: auto; text-align: center; background: #fff; border: 1px solid #F0DFB4; border-bottom: 3px solid #EACB8A;
+    border-radius: 12px; padding: 5px 12px;
+  }
+  .bestbadge b { font: 800 18px/1.1 "Baloo 2", sans-serif; color: #E08A18; display: block;
+    -webkit-text-fill-color: currentColor; background: none; }
+  .bestbadge span { font-size: 9.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; font-weight: 800; }
+  .staleline { margin: -4px 14px 10px; font-size: 11.5px; color: var(--gold2); font-weight: 800; }
+
+  /* ── progress ── */
+  .progress { margin: 0 14px 14px; animation: rise .45s .06s cubic-bezier(.2,1.4,.4,1) both; }
+  .progress .lbl { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight: 800; }
+  .progress .lbl .payout { color: #B07A16; }
+  .bar { height: 14px; border-radius: 8px; background: #E0E8F5; overflow: hidden; position: relative;
+    box-shadow: inset 0 1px 3px rgba(60,80,120,.18); }
+  .fill {
+    height: 100%; width: 0%; border-radius: 8px;
+    background: linear-gradient(90deg, var(--brand2), #82B4FF);
+    transition: width 1s cubic-bezier(.2,.8,.2,1); position: relative;
+  }
+  .fill::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.45) 45%, transparent 60%);
+    background-size: 220% 100%; animation: shimmer 2.2s linear infinite;
+  }
+
+  /* ── tips bar ── */
+  .tips {
+    margin: 0 14px 14px; padding: 7px 10px 7px 8px; border-radius: 13px;
+    background: #fff; border: 1px solid var(--line); border-bottom: 3px solid var(--line);
+    display: flex; align-items: center; gap: 9px; overflow: hidden;
+    animation: rise .45s .18s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .tipchip {
+    flex: none; font: 800 10px/1 "Baloo 2", sans-serif; letter-spacing: .06em; color: #fff;
+    background: linear-gradient(180deg, #6EA0F5, #5B8DEF); border-bottom: 2px solid #3E6CCB;
+    border-radius: 7px; padding: 4px 6px 3px;
+  }
+  .tipwin { flex: 1; min-width: 0; overflow: hidden; min-height: 32px; display: flex; align-items: center; }
+  .tip { font: 700 12.5px/1.3 "Nunito", -apple-system, sans-serif; color: var(--ink); }
+  .tip.in { animation: tipin .42s cubic-bezier(.2,1.2,.4,1) both; }
+  .tip.out { animation: tipout .26s ease-in both; }
+  @keyframes tipin { from { transform: translateX(110%); opacity: 0 } to { transform: none; opacity: 1 } }
+  @keyframes tipout { from { transform: none; opacity: 1 } to { transform: translateX(-60%); opacity: 0 } }
+
+  /* ── shop button ── */
+  .shopbtn {
+    display: block; margin: 0 14px 14px; width: calc(100% - 28px);
+    background: linear-gradient(180deg, #F6C13C, #E39A1F); color: #fff;
+    border: none; border-bottom: 4px solid #B8760F; border-radius: 14px;
+    padding: 11px; font: 800 15px/1.2 "Baloo 2", sans-serif; cursor: pointer;
+    text-shadow: 0 1px 0 rgba(120,70,0,.35);
+    position: relative; overflow: hidden;
+    animation: rise .45s .12s cubic-bezier(.2,1.4,.4,1) backwards, shopglow 2.8s ease-in-out 1s infinite;
+  }
+  .shopbtn:active { transform: translateY(3px); border-bottom-width: 1px; }
+  .shopbtn::after {
+    content: ""; position: absolute; top: -20%; bottom: -20%; left: 0; width: 34%;
+    background: linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.55) 50%, rgba(255,255,255,0) 100%);
+    transform: translateX(-140%) skewX(-18deg); pointer-events: none;
+    animation: shopshine 2.8s cubic-bezier(.4,0,.3,1) 1.2s infinite;
+  }
+  .shopbtn .spark { position: absolute; color: #FFF3C4; font-size: 10px; pointer-events: none; animation: spark 2.8s ease-in-out infinite; }
+  @keyframes shopshine { 0% { transform: translateX(-140%) skewX(-18deg) } 45%, 100% { transform: translateX(420%) skewX(-18deg) } }
+  @keyframes shopglow { 0%, 100% { box-shadow: 0 0 0 0 rgba(246,193,60,0) } 50% { box-shadow: 0 0 14px 2px rgba(246,193,60,.55) } }
+
+  /* ── shop view ── */
+  #viewShop {
+    min-height: 100vh; padding-bottom: 12px;
+    background:
+      radial-gradient(140% 70% at 50% -20%, rgba(255,240,190,.95) 0%, rgba(255,240,190,0) 60%),
+      linear-gradient(168deg, #6EA0F5 0%, #93B4F8 30%, #C9B7F0 58%, #F7B9C4 80%, #FFD39A 100%);
+  }
+  .awning {
+    height: 20px; margin: 0 0 4px;
+    background: repeating-linear-gradient(90deg, #F26D7D 0 24px, #FFFFFF 24px 48px);
+    -webkit-mask: radial-gradient(12px at 12px 20px, transparent 10px, #000 11px) 0 0 / 24px 100% repeat-x;
+            mask: radial-gradient(12px at 12px 20px, transparent 10px, #000 11px) 0 0 / 24px 100% repeat-x;
+    filter: drop-shadow(0 2px 2px rgba(60,40,80,.18));
+  }
+  .shophead h2 { color: #fff; text-shadow: 0 2px 0 rgba(62,108,203,.55), 0 3px 8px rgba(40,60,120,.25); }
+  /* --acc is set by renderAnimal to the animal's rarity colour */
+  .animalinfo { --acc: #8FA8FF;
+    background:
+      radial-gradient(120% 90% at 12% 0%, color-mix(in srgb, var(--acc) 55%, #fff) 0%, transparent 55%),
+      linear-gradient(160deg, color-mix(in srgb, var(--acc) 40%, #fff) 0%, color-mix(in srgb, var(--acc) 22%, #fff) 60%, color-mix(in srgb, var(--acc) 12%, #fff) 100%);
+    border: 1px solid color-mix(in srgb, var(--acc) 55%, #fff); border-bottom: 3px solid color-mix(in srgb, var(--acc) 75%, #fff);
+    border-radius: 14px; padding: 10px 12px 12px; }
+  .shop-section { background: rgba(255,255,255,.92); }
+  .shophead { display: flex; align-items: center; gap: 10px; padding: 12px 12px 4px; }
+  .shophead h2 { font: 800 18px/1.2 "Baloo 2", sans-serif; margin: 0; flex: 1; }
+  .backbtn { background: var(--card2); border: 1px solid #CBD5E6; border-bottom: 3px solid #B9C7DD;
+    border-radius: 10px; padding: 4px 12px; cursor: pointer; font: 800 14px "Baloo 2", sans-serif; color: var(--ink); }
+  .backbtn:active { transform: translateY(2px); border-bottom-width: 1px; }
+  .coinpill.inshop { position: static; font-size: 16px; padding: 3px 12px; border-bottom-width: 3px; }
+  .carousel { display: flex; align-items: center; gap: 6px; margin: 6px 12px 0; }
+  .carousel .arrow[hidden] { display: inline-block; visibility: hidden; } /* hidden arrows keep their width so the stage stays centered */
+  .arrow {
+    background: #fff; border: 1px solid var(--line); border-bottom: 3px solid #CBD5E6;
+    border-radius: 12px; width: 38px; height: 56px; cursor: pointer;
+    font: 800 18px "Baloo 2", sans-serif; color: var(--brand2);
+  }
+  .arrow:active { transform: translateY(2px); border-bottom-width: 1px; }
+  .stagebox {
+    flex: 1; height: 150px; background: radial-gradient(110% 95% at 50% 0%, #D5E5FB, #F0F5FC 70%);
+    border: 1px solid var(--line); border-radius: 16px; position: relative; overflow: hidden; isolation: isolate;
+  }
+  .stagebox > * { transition: filter .3s ease; }
+  .stagebox:not(.locked) > * { filter: saturate(1.35) contrast(1.06) brightness(1.04); }
+  .stagebox.locked > * { filter: grayscale(.72) opacity(.85); }
+  #animalStage { position: absolute; left: 50%; bottom: 2px; transform: translateX(-50%); width: 108px; height: 108px; }
+  #animalStage svg { overflow: visible; }
+  #animalStage .bigmoji { font-size: 74px; text-align: center; line-height: 108px;
+    filter: grayscale(1) opacity(.4) contrast(.8); }
+  .animalinfo { text-align: center; margin: 8px 12px 10px; }
+  .raritychip { display: inline-block; vertical-align: middle; padding: 2px 9px; border-radius: 9px;
+    font: 800 9.5px/1.5 "Nunito", sans-serif; text-transform: uppercase; letter-spacing: .08em; }
+  .rc-common { background: #E7ECF2; color: #5C6878; }
+  .rc-uncommon { background: #E2F6E9; color: #1F7A44; }
+  .rc-rare { background: #E5EFFF; color: #2C5FC4; }
+  .rc-epic { background: #F1E6FD; color: #7A34C8; }
+  .rc-legendary { position: relative; overflow: hidden; color: #7A4E08;
+    background: linear-gradient(135deg, #FFF3CE 0%, #FFD36B 55%, #F3B94A 100%);
+    box-shadow: 0 0 0 0 rgba(255,201,90,.55);
+    animation: legend-pulse 2.6s ease-in-out infinite; }
+  .rc-legendary::after { content: ""; position: absolute; top: -20%; bottom: -20%; left: -30%; width: 26%;
+    transform: skewX(-18deg); pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.9), transparent);
+    animation: legend-shimmer 2.8s ease-in-out .6s infinite; }
+  .br-chip.rc-legendary { animation: br-stamp .45s cubic-bezier(.2,1.6,.4,1) calc(var(--t) + 1.8s) forwards,
+    legend-pulse 2.6s ease-in-out calc(var(--t) + 2.3s) infinite; }
+  .animalinfo .aname-row { display: flex; justify-content: center; align-items: center; gap: 6px; }
+  .animalinfo .aname { font: 800 17px/1.2 "Baloo 2", sans-serif; }
+  .pencil { background: none; border: none; cursor: pointer; font-size: 13px; opacity: .55; padding: 0; }
+  .pencil:hover { opacity: 1; }
+  .renamerow { display: flex; justify-content: center; gap: 6px; margin-top: 5px; }
+  .renamerow input { width: 120px; border: 1px solid #CBD5E6; border-radius: 10px; padding: 5px 10px;
+    font: 800 13px "Baloo 2", sans-serif; text-align: center; outline: none; }
+  .renamerow button { background: var(--card2); border: 1px solid #CBD5E6; border-bottom: 3px solid #B9C7DD;
+    border-radius: 10px; padding: 5px 10px; font: 800 12px "Baloo 2", sans-serif; cursor: pointer; color: var(--ink); }
+  .renamerow button:active { transform: translateY(2px); border-bottom-width: 1px; }
+  .animalinfo .areq { font-size: 11.5px; color: var(--muted); font-weight: 800; margin-top: 1px; }
+  .buybtn {
+    margin-top: 7px; background: linear-gradient(180deg, #FFC24B, #FFA92E); color: #6B4A0C;
+    border: none; border-bottom: 4px solid #D98E1B; border-radius: 12px;
+    padding: 8px 22px; font: 800 14px "Baloo 2", sans-serif; cursor: pointer;
+  }
+  .buybtn:active { transform: translateY(3px); border-bottom-width: 1px; }
+  .buybtn[disabled] { background: var(--card2); color: var(--muted); border-bottom-color: #C4D0E2; cursor: default; }
+  .animalinfo .buybtn { padding: 5px 13px; font-size: 13px; border-radius: 10px; border-bottom-width: 3px; margin-top: 5px; }
+  .animalinfo .buybtn[disabled] { padding: 2px 10px; font-size: 11.5px; border-radius: 9px; border-bottom-width: 2px; margin-top: 4px; }
+  .shop-section.boxsec { background: linear-gradient(150deg, #FFF6DF 0%, #FFE9EE 55%, #F1E8FF 100%);
+    border-color: #F3D7A6; border-bottom-color: #E9C286; }
+  .shop-section.boxsec h4 { color: #A4601A; }
+  .shop-section { margin: 4px 12px 12px; background: var(--card); border: 1px solid var(--line);
+    border-bottom: 3px solid var(--line); border-radius: 14px; padding: 10px 12px 12px; }
+  .shop-section h4 { margin: 0 0 8px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .boxrow { display: flex; align-items: center; gap: 10px; }
+  .boxart { font-size: 38px; animation: wiggle 6s ease-in-out infinite; }
+  .boxinfo { flex: 1; }
+  .oddsrow { display: flex; gap: 4px; flex-wrap: wrap; }
+  .oddsrow .raritychip { padding: 2px 6px; font-size: 9px; }
+  .pitynote { font-size: 10.5px; color: var(--muted); font-weight: 800; margin-top: 4px; }
+  .boxbtn { margin-top: 0; padding: 6px 14px; font-size: 12.5px; line-height: 1.25; }
+  .boxbtn small { font-size: 11px; font-weight: 800; }
+  .shop-section.soon { opacity: .85; }
+  .stagebox { transition: border-color .3s ease, box-shadow .3s ease; }
+  .swatchrow { display: flex; gap: 8px; }
+  .swatch { flex: 1; background: var(--card); border: 1px solid var(--line); border-bottom: 3px solid var(--line);
+    border-radius: 14px; padding: 8px 4px 6px; text-align: center; cursor: pointer; transition: transform .15s ease; }
+  .swatch:hover { transform: translateY(-2px); }
+  .swatch:active { transform: translateY(2px); border-bottom-width: 1px; }
+  .swatch .dot { width: 22px; height: 22px; border-radius: 50%; margin: 0 auto 4px; border: 3px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.18); }
+  .swatch small { display: block; font-size: 10px; color: var(--muted); font-weight: 800; }
+  .swatch.equipped { border-color: var(--brand2); border-bottom: 3px solid var(--brand2); box-shadow: 0 0 0 2px #CFE0FA; }
+  .swatch.locked { opacity: .8; }
+  .swatch.cantafford { cursor: default; opacity: .5; }
+  .swatch.bought { animation: bought .5s cubic-bezier(.2,1.6,.4,1); }
+
+  /* ── settings ── */
+  details { margin: 0 12px 12px; }
+  summary { cursor: pointer; color: var(--muted); font-size: 11px; padding: 4px 2px; }
+  .settings { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px; margin-top: 6px; }
+  .setrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 4px 0 8px; font-weight: 800; font-size: 12px; cursor: pointer; }
+  .fb { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .fblabel { font: 800 11px/1 "Nunito", sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .fb textarea { width: 100%; box-sizing: border-box; resize: vertical; border: 1px solid #CBD5E6; border-radius: 10px; padding: 8px 10px;
+    font: 600 12.5px/1.4 "Nunito", sans-serif; color: var(--ink); background: #fff; margin-bottom: 6px; }
+  .fb textarea:focus { outline: 2px solid #CFE0FA; border-color: var(--brand2); }
+  .fb .row { align-items: center; }
+  .petswitch.inline { position: static; }
+  .datarow { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+  .datarow #sync { flex: 1; }
+  .whybtn { flex: none; background: linear-gradient(180deg, #6EA0F5, #5B8DEF); color: #fff; border: none; border-bottom: 3px solid #3E6CCB;
+    border-radius: 10px; padding: 4px 10px; font: 800 11px/1.3 "Baloo 2", sans-serif; cursor: pointer; white-space: nowrap;
+    transition: transform .08s, border-bottom-width .08s; }
+  .whybtn:active, .whybtn[aria-expanded="true"] { transform: translateY(2px); border-bottom-width: 1px; }
+  .whycard { margin-top: 8px; background: #F3F7FF; border: 1px solid #CFE0FA; border-bottom: 3px solid #B9CFF5; border-radius: 12px;
+    padding: 10px 12px; font: 400 11.5px/1.45 "Nunito", -apple-system, sans-serif; color: var(--ink);
+    animation: rise .3s cubic-bezier(.2,1.4,.4,1) backwards; }
+  .whycard b { display: block; font: 800 12px/1.3 "Baloo 2", sans-serif; margin-bottom: 4px; color: #3D6BC6; }
+  .whycard p { margin: 0 0 6px; } .whycard p:last-child { margin-bottom: 0; }
+  .whycard a { color: var(--brand2); font-weight: 800; }
+  .settings .row { display: flex; gap: 6px; margin-bottom: 8px; }
+  input[type="url"] { flex: 1; background: #fff; color: var(--ink); border: 1px solid #CBD5E6;
+    border-radius: 8px; padding: 6px 8px; font: inherit; }
+  .settings button { background: var(--card2); color: var(--ink); border: 1px solid #CBD5E6; border-radius: 8px;
+    border-bottom: 3px solid #B9C7DD; padding: 6px 10px; cursor: pointer; font: inherit; }
+  .settings button:active { transform: translateY(2px); border-bottom-width: 1px; }
+  table { border-collapse: collapse; width: 100%; margin-top: 6px; font-size: 11px; }
+  td { padding: 3px 4px; border-top: 1px solid var(--line); }
+  #sync { color: var(--muted); font-size: 11px; }
+  .sitebtn { width: 100%; margin-bottom: 8px; }
+  /* ── cards on the habitat ── */
+  .progress { background: var(--card); border: 1px solid var(--line); border-bottom: 3px solid var(--line); border-radius: 13px; padding: 10px 12px; }
+  #viewMain > details { margin: 0 14px 14px; background: var(--card); border: 1px solid var(--line); border-bottom: 3px solid var(--line); border-radius: 13px; padding: 6px 12px; }
+  #viewMain > details > summary { font-weight: 800; }
+  .staleline:not(:empty), .hint:not(:empty) { display: inline-block; background: rgba(255,255,255,.85); border-radius: 8px; padding: 2px 8px; }
+</style>
+</head>
+<body class="boot">
+  <div id="viewMain">
+    <div class="habitat" id="habitat"></div>
+    <div class="hero" id="hero">
+      <div class="petname" id="petName">…<button class="pencil heropencil" id="heroRename" title="Rename">✏️</button></div>
+      <div class="renamerow herorename" id="heroRenameRow" hidden>
+        <input id="heroRenameInput" maxlength="18">
+        <button id="heroRenameSave">Save</button>
+      </div>
+      <div class="moodchip" id="moodChip"></div>
+      <label class="petswitch" title="Show pet">
+        <span>🐾</span>
+        <input type="checkbox" id="petToggle">
+        <span class="track"><span class="knob"></span></span>
+      </label>
+      <div class="coinpill"><span id="coins">0</span>
+      </div>
+      <div id="petStage"></div>
+      <button class="cycle back" id="cyclePetBack" title="Previous friend" hidden>◀</button>
+      <button class="cycle" id="cyclePet" title="Next friend">▶</button>
+    </div>
+    <button class="equipbtn" id="equipBtn" hidden>Bring along</button>
+
+
+    <div class="treats">
+      <button class="treat" id="treatPlain" title="Give a treat"><svg viewBox="0 0 26 26" width="20" height="20"><g fill="#8A5426" stroke="#8A5426" stroke-width="2.6" stroke-linejoin="round"><circle cx="6.4" cy="10.6" r="3.1"/><circle cx="6.4" cy="15.4" r="3.1"/><circle cx="19.6" cy="10.6" r="3.1"/><circle cx="19.6" cy="15.4" r="3.1"/><rect x="6.4" y="10.4" width="13.2" height="5.2" rx="2.6"/></g><g fill="#EEDAC4"><circle cx="6.4" cy="10.6" r="3.1"/><circle cx="6.4" cy="15.4" r="3.1"/><circle cx="19.6" cy="10.6" r="3.1"/><circle cx="19.6" cy="15.4" r="3.1"/><rect x="6.4" y="10.4" width="13.2" height="5.2" rx="2.6"/></g></svg><b id="treatN">0</b></button>
+      <button class="treat rare" id="treatRare" title="Give a RARE treat"><svg viewBox="0 0 26 26" width="20" height="20"><g fill="#8A5426" stroke="#8A5426" stroke-width="2.6" stroke-linejoin="round"><circle cx="6.4" cy="10.6" r="3.1"/><circle cx="6.4" cy="15.4" r="3.1"/><circle cx="19.6" cy="10.6" r="3.1"/><circle cx="19.6" cy="15.4" r="3.1"/><rect x="6.4" y="10.4" width="13.2" height="5.2" rx="2.6"/></g><g fill="#E9B44C"><circle cx="6.4" cy="10.6" r="3.1"/><circle cx="6.4" cy="15.4" r="3.1"/><circle cx="19.6" cy="10.6" r="3.1"/><circle cx="19.6" cy="15.4" r="3.1"/><rect x="6.4" y="10.4" width="13.2" height="5.2" rx="2.6"/></g><circle cx="13" cy="6.6" r="1.3" fill="#FFF6DC"/></svg><b id="treatRareN">0</b><span class="spark">✦</span><span class="spark">✦</span></button>
+      <span class="hint" id="treatHint"></span>
+      <button class="wardrobebtn" id="openWardrobe">👕 Wardrobe</button>
+    </div>
+
+    <div class="streak">
+      <div class="flame" id="flame">🔥</div>
+      <div><b id="streakN">–</b><small>day streak</small></div>
+      <button class="claimbtn" id="claimStreak" hidden>Claim</button>
+      <div class="bestbadge"><b id="streakHigh">–</b><span>best</span></div>
+    </div>
+    <div class="staleline" id="staleLine"></div>
+
+
+    <div class="progress">
+      <div class="lbl"><span id="progLabel">next milestone</span><span class="payout" id="progPayout"></span></div>
+      <div class="bar"><div class="fill" id="fill"></div></div>
+    </div>
+
+    <!-- @strip:visits --><button class="friendsbtn" id="openFriends">👥 Friends</button><!-- @/strip:visits -->
+    <button class="shopbtn" id="openShop">🛍️ Browse the shop
+      <span class="spark" style="left:12%;top:18%">✦</span>
+      <span class="spark" style="left:86%;top:22%;animation-delay:.9s">✦</span>
+      <span class="spark" style="left:70%;top:62%;animation-delay:1.8s;font-size:8px">✦</span>
+    </button>
+
+    <div class="tips" id="tips" aria-live="polite">
+      <span class="tipchip">TIP</span>
+      <div class="tipwin"><div class="tip" id="tip"></div></div>
+    </div>
+
+    <details>
+      <summary>Settings & data</summary>
+      <div class="settings">
+        <button id="enableSite" class="sitebtn" hidden></button>
+        <label class="setrow"><span>Pet sleeps at night (11pm–7am)</span>
+          <span class="petswitch inline"><input type="checkbox" id="nightToggle"><span class="track"><span class="knob"></span></span></span>
+        </label>
+        <div class="datarow">
+          <div id="sync"></div>
+          <button type="button" class="whybtn" id="whyBtn" aria-expanded="false" aria-controls="whyCard">? what we send</button>
+        </div>
+        <div class="whycard" id="whyCard" hidden>
+              <b>What leaves your browser, and why</b>
+              <p>Your coins, streak rewards, collars and companions are kept on our server under an anonymous device id (a random string, not tied to your name or Canvas account) so they can't be tampered with. Earning coins sends the number of the assignment you submitted or the streak milestone you hit; shopping sends what you picked.</p>
+              <p>To keep your pet across devices, the extension saves that device id in your Canvas account's private app storage. Only you can read it. It contains nothing about you.</p>
+              <p>If you send feedback from Settings, we store the message with your device id and the extension version.</p>
+              <p>Never sent: your name, email, Canvas account, grades, submissions, messages, or assignment titles. The pet reads your course list and overdue status from Canvas to know how you're doing; that stays in this browser.</p>
+              <p>To delete your answers, email <a href="mailto:alecmartinnnn@gmail.com" target="_blank">alecmartinnnn@gmail.com</a> with your device id. <a href="https://canvas-digest-production.up.railway.app/privacy" target="_blank">Full privacy policy</a>.</p>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button id="copyId">Copy device id</button>
+        </div>
+        <div class="fb">
+          <div class="fblabel">Concerns, suggestions, bugs</div>
+          <textarea id="fbText" maxlength="2000" rows="3" placeholder="Tell us anything, any feedback is appreciated"></textarea>
+          <div class="row"><button id="fbSend">Send</button><span class="hint" id="fbStatus"></span></div>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <!-- @strip:visits -->
+  <div id="viewFriends" hidden>
+    <div class="shophead">
+      <button class="backbtn" id="friendsBack">←</button>
+      <h2 style="color:var(--ink);text-shadow:none">Friends</h2>
+      <div class="coinpill inshop"><span id="coins4">0</span></div>
+    </div>
+    <div class="wsection">
+      <label class="setrow"><span>Let Pets Visit</span>
+        <span class="petswitch inline"><input type="checkbox" id="visitsToggle"><span class="track"><span class="knob"></span></span></span>
+      </label>
+      <div class="hint" id="visitsNote">Nobody can see your grades or your work. It's just someone's pet.</div>
+    </div>
+    <div class="wsection">
+      <div class="aname-row" style="justify-content:flex-start;gap:8px"><div class="aname" id="nickShow"></div><button class="pencil" id="nickEdit" title="Rename">✏️</button></div>
+      <div class="renamerow" id="nickRow" hidden><input id="nickInput" maxlength="14" autocomplete="off"><button id="nickSave"></button></div>
+      <div class="hint spendStatus" id="nickStatus" style="min-height:14px"></div>
+    </div>
+    <div class="wsection" id="friendsList"></div>
+  </div>
+
+  <!-- @/strip:visits -->
+  <div id="viewWardrobe" hidden>
+    <div class="shophead">
+      <button class="backbtn" id="wardrobeBack">←</button>
+      <h2 style="color:var(--ink);text-shadow:none">Wardrobe</h2>
+      <div class="coinpill inshop"><span id="coins3">0</span></div>
+    </div>
+    <div class="wstage"><div class="habitat" id="wardrobeHabitat"></div><div id="wardrobeStage"></div></div>
+    <div class="wperk" id="wardrobePerk"></div>
+    <div class="wsection">
+      <h4>Collars</h4>
+      <div class="cgrid" id="wardrobeCollars"></div>
+    </div>
+    <button class="wshoplink" id="wardrobeToShop">🛍️ Get more in the shop</button>
+  </div>
+
+  <div id="viewShop" hidden>
+    <div class="awning"></div>
+    <div class="shophead">
+      <button class="backbtn" id="backBtn">←</button>
+      <h2>Shop</h2>
+      <div class="coinpill inshop"><span id="coins2">0</span></div>
+    </div>
+    <div class="hint spendStatus" style="text-align:center;min-height:14px"></div>
+    <div class="carousel">
+      <button class="arrow" id="prevAnimal">◀</button>
+      <div class="stagebox"><div class="habitat" id="shopHabitat"></div><div id="animalStage"></div></div>
+      <button class="arrow" id="nextAnimal">▶</button>
+    </div>
+    <div class="animalinfo">
+      <div class="aname-row">
+        <div class="aname" id="animalName"></div>
+        <button class="pencil" id="renameBtn" hidden title="Rename">✏️</button>
+      </div>
+      <div style="margin-top:3px"><span class="raritychip" id="rarityChip"></span></div>
+      <div class="renamerow" id="renameRow" hidden>
+        <input id="renameInput" maxlength="18">
+        <button id="renameSave"></button>
+      </div>
+      <div class="areq" id="animalReq"></div>
+      <button class="buybtn" id="animalAction"></button>
+    </div>
+    <div class="shop-section boxsec">
+      <h4>Clothing box</h4>
+      <div class="boxrow">
+        <div class="boxart">🎁</div>
+        <div class="boxinfo">
+          <div class="oddsrow">
+            <span class="raritychip rc-common">58.5%</span><span class="raritychip rc-uncommon">25%</span><span class="raritychip rc-rare">10%</span><span class="raritychip rc-epic">5%</span><span class="raritychip rc-legendary">1.5%</span>
+          </div>
+        </div>
+        <button class="buybtn boxbtn" id="openBox">Open<br>🪙 120</button>
+      </div>
+    </div>
+    <div class="shop-section soon">
+      <h4>Animal box · coming soon</h4>
+      <div class="boxrow"><div class="boxart" style="animation:none;filter:grayscale(.6) opacity(.7)">📦</div>
+        <div class="boxinfo"><div style="font-size:12px;color:var(--muted);font-weight:800">New animals arrive here first.</div></div></div>
+    </div>
+    <div class="shop-section" id="collarSection">
+      <h4>Collars</h4>
+      <div class="cgrid" id="collarShop"></div>
+    </div>
+    <div class="shop-section" id="promoSection">
+      <div class="renamerow" style="margin:0"><input id="promoInput" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Code"><button id="promoBtn">Redeem</button></div>
+      <div class="hint spendStatus" id="promoStatus" style="min-height:14px"></div>
+    </div>
+  </div>
+
+  <!-- @strip:visits -->
+  <div id="firstVisit" hidden>
+    <div class="celebrate-flash"></div>
+    <div class="celebrate-rays"></div>
+    <div class="fv-moji">🐾</div>
+    <div class="fv-title">A pet has visited your Canvas!</div>
+    <div class="fv-text" id="fvText">Pets from other students wander in occasionally. Tap the visitor for a Reward!</div>
+    <div class="fv-text fv-strong">A visiting pet cannot see your grades, your coursework, or anything else in your Canvas.</div>
+    <button class="sr-btn" id="fvDone">Let's go</button>
+  </div>
+
+  <!-- @/strip:visits -->
+  <div id="streakReward" hidden>
+    <div class="celebrate-flash"></div>
+    <div class="celebrate-rays"></div>
+    <div class="sr-coin" id="srCoin"></div>
+    <div class="sr-amount" id="srAmount">+0</div>
+    <div class="sr-text"></div>
+    <div class="sr-sub" id="srSub"></div>
+    <button class="sr-btn" id="srDone">Sweet</button>
+  </div>
+
+  <div id="welcome" hidden>
+    <div class="celebrate-flash"></div>
+    <div class="celebrate-rays"></div>
+    <div class="wl-title">Welcome!</div>
+    <div class="wl-tap">tap to continue</div>
+  </div>
+
+  <div id="adoptModal" hidden>
+    <div class="confirm-card adopt-card">
+      <h3>Choose your friend</h3>
+      <div class="hint spendStatus" style="min-height:14px;color:#DE6A5B"></div>
+      <div class="starters">
+        <div class="starter"><div class="sstage" id="choosePup"></div><button class="pickbtn" id="pickPup">Puppy</button></div>
+        <div class="starter"><div class="sstage" id="chooseCat"></div><button class="pickbtn" id="pickCat">Kitten</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="siteModal" hidden>
+    <div class="confirm-card">
+      <h3>Use on this site</h3>
+      <p><b id="siteHost"></b><br>(my school's Canvas)</p>
+      <div class="confirm-row">
+        <button id="siteNo">Not now</button>
+        <button id="siteYes">Use on this site</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirmModal" hidden>
+    <div class="confirm-card">
+      <div class="cmoji" id="confirmMoji"></div>
+      <h3 id="confirmTitle"></h3>
+      <p><span id="confirmNote">Adoptions are forever.</span><br><span class="price" id="confirmPrice"></span></p>
+      <div class="confirm-row">
+        <button id="confirmNo">Not yet</button>
+        <button id="confirmYes">Adopt</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="boxReveal" hidden>
+    <div class="br-flash"></div>
+    <div class="br-rays"></div>
+    <div class="br-box">
+      <svg class="br-lid" viewBox="0 0 120 40"><rect x="4" y="10" width="112" height="30" rx="8" fill="var(--bx2)"/><rect x="4" y="10" width="112" height="30" rx="8" fill="none" stroke="var(--bxd)" stroke-width="4"/><rect x="50" y="6" width="20" height="34" fill="var(--rib)"/><path d="M60 8 c-14 -18 -30 -8 -12 4 c-18 -12 -2 -22 12 -4 c14 -18 30 -8 12 4 c18 -12 2 -22 -12 -4 z" fill="var(--rib)" stroke="var(--bxd)" stroke-width="3" stroke-linejoin="round"/></svg>
+      <svg class="br-body" viewBox="0 0 120 90"><rect x="10" y="0" width="100" height="86" rx="10" fill="var(--bx)"/><rect x="10" y="0" width="100" height="86" rx="10" fill="none" stroke="var(--bxd)" stroke-width="4"/><rect x="50" y="0" width="20" height="86" fill="var(--rib)"/></svg>
+      <div class="br-leak"></div>
+      <div class="br-beam"></div>
+    </div>
+    <div class="br-tap" id="brTap">tap to open</div>
+    <div class="br-stage" id="brStage"></div>
+    <div class="br-name" id="brName"></div>
+    <span class="raritychip br-chip" id="brChip"></span>
+    <div class="br-perk" id="brPerk"></div>
+    <div class="br-actions" id="brActions"><button class="save" id="brDone">Sweet</button></div>
+  </div>
+
+  <div id="celebrate" hidden>
+    <div class="celebrate-flash"></div>
+    <div class="celebrate-rays"></div>
+    <div class="celebrate-orb"></div>
+    <div class="celebrate-pet" id="celebratePet"></div>
+    <div class="celebrate-text" id="celebrateText"></div>
+    <div class="celebrate-name" id="celebrateName">
+      <input id="nameInput" maxlength="18">
+      <button class="save" id="nameSave">✓</button>
+      <button class="skip" id="nameSkip">later</button>
+    </div>
+  </div>
+
+  <script src="coin.js"></script>
+  <script src="collar-engine.js"></script>
+  <script src="network.js"></script>
+  <script src="ledger.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
