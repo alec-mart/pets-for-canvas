@@ -25,7 +25,7 @@ Full policy: https://canvas-digest-production.up.railway.app/privacy
 - `extension/` — the extension as shipped (MV3). `content.js` detects completion moments, `streak.js` keeps the streak, `economy.js` turns events into earn requests, `pet.js` is the pet, `popup.*` is the hub, `network.js` is the only file that talks to the network.
 - `backend/` — FastAPI service. The ledger is server-authoritative: prices, ownership, box odds and streak payouts live in `backend/ledger.py`. Nothing the client stores can change a balance.
 - `tools/` — store package build (`build-store-zip.sh`), rig builders for the animals, the test bench, the admin inbox reader.
-- `docs/` — privacy policy, data flow, streak spec, design notes, benches.
+- `docs/` — privacy policy and the animal/collar test benches.
 
 ## Run it
 

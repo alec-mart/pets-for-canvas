@@ -81,7 +81,7 @@ async function netVisitor(deviceId, host, courses) {
 
 // ---- the student's own Canvas (same-origin session, never a token) ----
 
-// GET a Canvas API path as JSON (missing_submissions for overdue state; courses for visits)
+// GET a Canvas API path as JSON (missing_submissions and planner items for streak/overdue state; courses for visits)
 async function netCanvasJson(path) {
   const r = await fetch(path, { credentials: "same-origin", headers: { accept: "application/json" } });
   if (!r.ok) throw new Error(`${path} → ${r.status}`);

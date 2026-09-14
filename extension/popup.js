@@ -1049,7 +1049,9 @@ document.getElementById("fbSend").onclick = async () => {
   try {
     const device_id = await ledgerDeviceId();
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true }).catch(() => [null]);
-    const host = tab?.url ? new URL(tab.url).hostname : "";
+    const { extra_hosts = [] } = await chrome.storage.local.get("extra_hosts");
+    const tabHost = tab?.url ? new URL(tab.url).hostname : "";
+    const host = /\.instructure\.com$/i.test(tabHost) || extra_hosts.includes(tabHost) ? tabHost : "";
     await netFeedback({ device_id, message, version: chrome.runtime.getManifest().version, host });
     ta.value = ""; st.textContent = "Sent. Thank you.";
   } catch { st.textContent = "Couldn't send — try again in a bit."; }
@@ -1096,10 +1098,11 @@ async function renderSiteEnable() {
 }
 
 // the popup opens on the tab the icon was clicked on; activeTab lets it look at that page once
-async function detectCanvasTab() {
+async function detectCanvasTab(snoozed) {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true }).catch(() => [null]);
   const u = tab?.url ? new URL(tab.url) : null;
   if (!tab?.id || !u || u.protocol !== "https:" || /\.instructure\.com$/i.test(u.hostname)) return null;
+  if ((snoozed[u.hostname] ?? 0) > Date.now() - 864e5) return null;
   const origin = `${u.origin}/*`;
   if (await chrome.permissions.contains({ origins: [origin] })) return null;
   const [r] = await chrome.scripting.executeScript({
@@ -1113,8 +1116,8 @@ async function maybeSitePrompt() {
   if (!m.hidden) return;
   const { cd_econ, site_prompt_snoozed = {} } = await chrome.storage.local.get(["cd_econ", "site_prompt_snoozed"]);
   if (!cd_econ?.adopted) return;
-  const c = await detectCanvasTab();
-  if (!c || (site_prompt_snoozed[c.host] ?? 0) > Date.now() - 864e5) return;
+  const c = await detectCanvasTab(site_prompt_snoozed);
+  if (!c) return;
   document.getElementById("siteHost").textContent = c.host;
   m.hidden = false;
   document.getElementById("siteNo").onclick = async () => {

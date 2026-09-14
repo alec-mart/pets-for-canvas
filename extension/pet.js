@@ -663,12 +663,13 @@
     card.id = "cd-player-card";
     const glyph = (id) => { const d = COLLAR_DEFS.find((x) => x.id === id); if (!d) return ""; const w = document.createElement("div"); w.innerHTML = collarGlyph(44); applyCollarDef(w.querySelector("svg"), d, "card" + id); return w.innerHTML; };
     const flame = v.best_streak >= 365 ? "#C55BFF" : v.best_streak >= 100 ? "#FF6B3D" : v.best_streak >= 30 ? "#FFA62B" : "#FFC24B";
-    card.innerHTML = `<div style="font:800 15px/1.2 'Baloo 2','Nunito',sans-serif">${v.nick || ""}</div>
-      <div style="font:700 12px/1.3 Nunito,sans-serif;color:#6B7387;margin-top:2px">${v.pet_name || ""}</div>
+    card.innerHTML = `<div class="cd-vc-nick" style="font:800 15px/1.2 'Baloo 2','Nunito',sans-serif"></div>
+      <div class="cd-vc-pet" style="font:700 12px/1.3 Nunito,sans-serif;color:#6B7387;margin-top:2px"></div>
       <div style="display:flex;gap:10px;align-items:center;margin-top:8px">${(v.showcase || []).map(glyph).join("")}</div>
       <div style="display:flex;align-items:center;gap:6px;margin-top:8px;font:800 14px/1 'Baloo 2',sans-serif;color:${flame}">
         <svg width="16" height="18" viewBox="0 0 16 18"><path d="M8 1 C9 5 13 6 13 11 A5 5 0 0 1 3 11 C3 8 5 7 5 5 C6 7 7 7 8 1Z" fill="${flame}"/></svg>${v.best_streak || 0}</div>
       ${v.pid && !v.demo ? `<button id="cd-add-friend" style="margin-top:10px;width:100%;background:linear-gradient(180deg,#6EA0F5,#5B8DEF);color:#fff;border:none;border-bottom:4px solid #3E6CCB;border-radius:12px;padding:7px 12px;font:800 13px 'Baloo 2',sans-serif;cursor:pointer">Add friend</button>` : ""}`;
+    card.querySelector(".cd-vc-nick").textContent = v.nick || ""; card.querySelector(".cd-vc-pet").textContent = v.pet_name || "";
     card.style.cssText = `position: fixed; z-index: 2147483647; left: ${Math.min(Math.max(8, vis.x + SIZE / 2 - 90), window.innerWidth - 188)}px; top: ${window.innerHeight - SIZE - 150}px; width: 180px;
       background: #fff; color: #1E2433; border: 1px solid #DDE3F0; border-bottom: 3px solid #D8DFEA; border-radius: 14px; padding: 12px 14px;
       box-shadow: 0 10px 30px rgba(30,50,110,.18); font-family: Nunito, -apple-system, sans-serif;`;

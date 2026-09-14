@@ -2,6 +2,7 @@
 here, keyed by the anonymous device id; the extension only asks. Earning is deduped per key and
 capped per device per day, so a forged request is bounded to one person's own cosmetics.
 """
+import hmac
 import json
 import os
 import random
@@ -131,7 +132,7 @@ def _save(conn, device_id: str, state: dict) -> None:
 
 def _dev_ok(x_dev: str | None) -> bool:
     secret = os.environ.get("DEV_SECRET", "")
-    return bool(secret) and x_dev == secret
+    return bool(secret) and bool(x_dev) and hmac.compare_digest(x_dev, secret)
 
 
 class EarnIn(BaseModel):

@@ -42,4 +42,5 @@ mkdir -p dist && rm -f "dist/pets-for-canvas-$VER.zip"
 (cd "$TMP/pkg" && zip -qr "$OLDPWD/dist/pets-for-canvas-$VER.zip" .)
 rm -rf "$TMP"
 echo "store package: dist/pets-for-canvas-$VER.zip (DEV=false)"
+shasum -a 256 "dist/pets-for-canvas-$VER.zip"
 unzip -p "dist/pets-for-canvas-$VER.zip" popup.js | grep -c "const DEV = false" >/dev/null && echo "verified: no dev helpers"
