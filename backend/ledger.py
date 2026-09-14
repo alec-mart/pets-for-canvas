@@ -241,17 +241,6 @@ def earn(device_id: str, e: EarnIn) -> dict:
     return {"state": _public(s), "awarded": pts}
 
 
-def _roll_tier_lower() -> str:
-    # common / uncommon / rare, at their printed proportions
-    odds = [(t, p) for t, p in BOX_ODDS if t in ("common", "uncommon", "rare")]
-    total = sum(p for _, p in odds); r = random.random() * total
-    for tier, p in odds:
-        if r < p:
-            return tier
-        r -= p
-    return "common"
-
-
 def _roll_tier(force: str | None) -> str:
     if force in TIER_COINS:
         return force
@@ -319,9 +308,8 @@ def spend(device_id: str, sp: SpendIn, x_dev: str | None = Header(default=None))
         elif a == "open_box":
             worn = s["equipped"].get("collar")
             price = max(0, BOX_PRICE - BOX_DISCOUNT.get(worn, 0))
-            first = False
             if s.get("first_box", 0) > 0:
-                s["first_box"] -= 1; first = True
+                s["first_box"] -= 1
             elif s.get("free_boxes", 0) > 0:
                 s["free_boxes"] -= 1
             elif s["balance"] >= price:
@@ -329,8 +317,6 @@ def spend(device_id: str, sp: SpendIn, x_dev: str | None = Header(default=None))
             else:
                 raise HTTPException(409, "not enough coins")
             tier = _roll_tier(sp.force if _dev_ok(x_dev) else None)
-            if first and tier in ("epic", "legendary"):
-                tier = _roll_tier_lower()
             pool = [cid for cid, (r, _) in COLLARS.items() if r == tier and cid not in PLUS_ONLY and f"collar_{cid}" not in s["owned"]]
             if pool:
                 pick = random.choice(pool)
