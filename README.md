@@ -6,7 +6,7 @@ Install: https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmf
 
 ![Pets for Canvas on a Canvas page](docs/screenshot.png)
 
-Made by a student. Trademarked Winston Digital LLC.
+Made by a student. Pets for Canvas™ is a trademark of Winston Digital LLC.
 
 AI was used to assist the creation of this project
 
