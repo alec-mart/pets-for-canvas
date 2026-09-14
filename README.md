@@ -33,7 +33,7 @@ Full policy: https://canvas-digest-production.up.railway.app/privacy
 
 ## Verify what is running
 
-- Store package: `tools/build-store-zip.sh` builds the zip from this repo. Each release is tagged (`v1.0.8`) and the tag message carries the zip's sha256. Unzip the store copy and diff it against a local build.
+- Store package: `tools/build-store-zip.sh` builds the zip from this repo. Each release is tagged (`v1.0.9`) and the tag message carries the zip's sha256. Unzip the store copy and diff it against a local build.
 - Server: `GET https://canvas-digest-production.up.railway.app/version` returns the commit the running API was deployed from (`tools/deploy.sh` sets it). The API is hosted on Railway and operated by Winston Digital LLC.
 
 ## Run it
