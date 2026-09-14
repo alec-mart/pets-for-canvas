@@ -6,18 +6,20 @@ Install: https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmf
 
 ![Pets for Canvas on a Canvas page](docs/screenshot.png)
 
-Made by a Michigan Tech student. Winston Digital LLC. Built with AI assistance; the product, the design decisions, the art direction and the economy are mine.
+Made by a student. Trademarked Winston Digital LLC.
+
+AI was used to assist the creation of this project
 
 ## What it does
 
-A pet walks around your Canvas pages. It gets happy when you submit, sad when something is overdue, and sleeps at night. Finish what is due each day and your streak grows. Streaks pay coins, coins buy collars and new animals.
+Adds a pet that walks around your Canvas page. Gets happy when you submit, sad when something is overdue, and sleeps at night. Finish what is due each day and your streak grows. Streaks pay coins, coins buy collars and new animals.
 
 ## What leaves your browser
 
 Every outbound request the extension makes is in one file: `extension/network.js`. There is nothing else. In short:
 
-- The API receives an anonymous device id plus the game events it needs to keep your balance honest: an assignment id when you submit, a milestone day count, shop actions, and anything you type into the feedback box.
-- Your own Canvas is read on your logged-in session for overdue state, and one private entry is written to your Canvas custom data so your pet follows your Canvas login across devices. Nothing is ever posted, submitted or changed in your courses.
+- The API receives an anonymous device id plus the game events it needs to keep your coin balance accurate: an assignment id when you submit, a milestone day count, shop actions, and anything you type into the feedback box.
+- Canvas is read on your logged-in session for overdue state, and one private entry is written to your Canvas custom data so pets follow Canvas login across devices. Nothing is ever posted, submitted or changed in your courses.
 - No names, no grades, no messages, no page contents, no browsing history.
 
 Full policy: https://canvas-digest-production.up.railway.app/privacy
