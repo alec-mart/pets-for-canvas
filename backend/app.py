@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI, Header, HTTPException, Query
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sqlalchemy import func, insert, select
@@ -73,6 +73,26 @@ def privacy_check() -> dict:
 @app.get("/healthz")
 def healthz() -> dict:
     return {"ok": True}
+
+
+# petsforcanvas.com: the root goes to the store until a landing page exists; /source and /support are the repo
+STORE_URL = "https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc"
+REPO_URL = "https://github.com/alec-mart/pets-for-canvas"
+
+
+@app.get("/")
+def root() -> RedirectResponse:
+    return RedirectResponse(STORE_URL, status_code=302)
+
+
+@app.get("/source")
+def source() -> RedirectResponse:
+    return RedirectResponse(REPO_URL, status_code=302)
+
+
+@app.get("/support")
+def support() -> RedirectResponse:
+    return RedirectResponse(REPO_URL + "/issues", status_code=302)
 
 
 # APP_COMMIT is set by tools/deploy.sh to the public repo commit the running code was built from
