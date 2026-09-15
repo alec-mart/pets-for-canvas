@@ -8,7 +8,7 @@ import os
 import random
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import Column, DateTime, Integer, String, Table, Text, func, insert, select, update
 
@@ -163,10 +163,12 @@ class SpendIn(BaseModel):
 
 
 @router.get("/{device_id}")
-def get_ledger(device_id: str) -> dict:
+def get_ledger(device_id: str, pet: str | None = Query(default=None, pattern="^[01]$")) -> dict:
     _check_id(device_id)
     with engine.begin() as conn:
         state = _load(conn, device_id)
+        if pet is not None:
+            state["pet_on"] = pet == "1"
         _seen(conn, device_id, state)
         _save(conn, device_id, state)
         info = []

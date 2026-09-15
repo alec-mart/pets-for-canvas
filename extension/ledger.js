@@ -26,7 +26,8 @@ async function ledgerGet({ fresh = false } = {}) {
   if (!fresh && ledgerMemo.state && Date.now() - ledgerMemo.at < 1500) return ledgerMemo.state;
   await ledgerFlush();
   try {
-    const state = await netLedgerGet(await ledgerDeviceId());
+    const { pet_enabled } = await chrome.storage.local.get("pet_enabled");
+    const state = await netLedgerGet(await ledgerDeviceId(), pet_enabled !== false);
     ledgerMemo = { at: Date.now(), state };
     return ledgerMirror(state);
   } catch {

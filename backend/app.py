@@ -223,7 +223,7 @@ def admin_inbox(x_dev: str | None = Header(default=None), limit: int = Query(def
         try: j = _json.loads(st)
         except Exception: j = {}
         installs.append({"device": did[:8], "device_full": did, "installed": iso(cat), "last_seen": iso(uat), "adopted": bool(j.get("adopted")),
-                         "animal": (j.get("equipped") or {}).get("animal"), "balance": j.get("balance", 0), "lifetime": j.get("lifetime", 0), "days_seen": j.get("days_seen", [])})
+                         "animal": (j.get("equipped") or {}).get("animal"), "balance": j.get("balance", 0), "lifetime": j.get("lifetime", 0), "days_seen": j.get("days_seen", []), "pet_on": j.get("pet_on"), "streak7": "7" in (j.get("milestones_paid") or {}), "welcome_claimed": bool(j.get("welcome_claimed")), "first_box_open": not j.get("first_box", 0) and bool(j.get("adopted"))})
     return {
         "pulse": {"installs": n_led, "installs_7d": n_led_wk},
         "installs": installs,
