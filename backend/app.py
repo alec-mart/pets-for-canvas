@@ -69,7 +69,7 @@ def _startup() -> None:
 
 
 SITE_HOST = "petsforcanvas.com"
-_SITE_PATHS = ("/", "/privacy", "/robots.txt", "/sitemap.xml", "/support", "/source")
+_SITE_PATHS = ("/", "/privacy", "/robots.txt", "/sitemap.xml", "/support", "/source", "/canvas-extension")
 
 
 @app.middleware("http")
@@ -131,6 +131,11 @@ async def _http_exc(request: Request, exc: _StarletteHTTPExc):
 @app.get("/", response_class=HTMLResponse)
 def root() -> str:
     return (_SITE / "index.html").read_text(encoding="utf-8")
+
+
+@app.get("/canvas-extension", response_class=HTMLResponse)
+def canvas_extension_page() -> str:
+    return (_SITE / "canvas-extension.html").read_text(encoding="utf-8")
 
 
 @app.get("/robots.txt", response_class=PlainTextResponse)

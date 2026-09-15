@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pets for Canvas – A pet that lives in your Canvas | Free Chrome extension</title>
-<meta name="description" content="A pet that lives in your Canvas. Free Chrome extension, open source, no login. Submit assignments to earn coins, keep your streak alive, adopt new animals.">
-<link rel="canonical" href="https://petsforcanvas.com/">
+<title>Canvas extension with a pet, streaks and coins – Pets for Canvas</title>
+<meta name="description" content="Pets for Canvas is a free, open-source Chrome extension for Canvas LMS. A pet lives on your Canvas pages, streaks pay coins, and it runs alongside BetterCampus and Tasks for Canvas.">
+<link rel="canonical" href="https://petsforcanvas.com/canvas-extension">
 <link rel="icon" type="image/png" href="/site/img/icon-128.png">
 <link rel="apple-touch-icon" href="/site/img/icon-512.png">
 <link rel="preload" href="/site/img/baloo2.woff2" as="font" type="font/woff2" crossorigin>
@@ -13,15 +13,15 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Pets for Canvas">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="Pets for Canvas">
+<meta property="og:title" content="Canvas extension with a pet – Pets for Canvas">
 <meta property="og:description" content="A pet that lives in your Canvas. Free Chrome extension, open source, no login.">
 <meta property="og:image" content="https://petsforcanvas.com/site/img/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Pets for Canvas: a puppy and a kitten">
-<meta property="og:url" content="https://petsforcanvas.com/">
+<meta property="og:url" content="https://petsforcanvas.com/canvas-extension">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Pets for Canvas">
+<meta name="twitter:title" content="Canvas extension with a pet – Pets for Canvas">
 <meta name="twitter:description" content="A pet that lives in your Canvas. Free Chrome extension, open source, no login.">
 <meta name="twitter:image" content="https://petsforcanvas.com/site/img/og.jpg">
 <script type="application/ld+json">
@@ -31,9 +31,6 @@
 {"@type":"SoftwareApplication","@id":"https://petsforcanvas.com/#app","name":"Pets for Canvas","url":"https://petsforcanvas.com/","description":"A pet that lives in your Canvas. Free Chrome extension, open source, no login.","image":"https://petsforcanvas.com/site/img/icon-512.png","applicationCategory":"EducationalApplication","applicationSubCategory":"Browser extension","operatingSystem":"Windows, macOS, Linux, ChromeOS","browserRequirements":"Requires Google Chrome","softwareVersion":"1.0.9","datePublished":"2026-09-06","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true,"license":"https://www.apache.org/licenses/LICENSE-2.0","installUrl":"https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc","downloadUrl":"https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc","sameAs":["https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc","https://github.com/alec-mart/pets-for-canvas"],"screenshot":["https://petsforcanvas.com/site/img/1-canvas.jpg","https://petsforcanvas.com/site/img/2-adopt.jpg","https://petsforcanvas.com/site/img/3-dress.jpg","https://petsforcanvas.com/site/img/4-streak.jpg","https://petsforcanvas.com/site/img/5-collect.jpg"],"author":{"@id":"https://petsforcanvas.com/#org"},"publisher":{"@id":"https://petsforcanvas.com/#org"}},
 {"@type":"SoftwareSourceCode","codeRepository":"https://github.com/alec-mart/pets-for-canvas","programmingLanguage":"JavaScript","license":"https://www.apache.org/licenses/LICENSE-2.0","targetProduct":{"@id":"https://petsforcanvas.com/#app"}}
 ]}
-</script>
-<script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is it free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. It is free, there is no login, and coins can't be bought."}}, {"@type": "Question", "name": "Does it need my Canvas token?", "acceptedAnswer": {"@type": "Answer", "text": "No. It runs on the Canvas session you are already logged into. No accounts, no passwords, no Canvas access tokens."}}, {"@type": "Question", "name": "Does it work at my school?", "acceptedAnswer": {"@type": "Answer", "text": "It works with any school on Canvas. If your school runs Canvas on its own web address, the extension offers a one-click \"Use on this site\" the first time you open it there."}}, {"@type": "Question", "name": "Does it change anything in my courses?", "acceptedAnswer": {"@type": "Answer", "text": "No. Nothing is ever posted, submitted or changed in your courses. The pet reads what is due and whether anything is overdue, and that stays in your browser."}}, {"@type": "Question", "name": "How do I delete my data?", "acceptedAnswer": {"@type": "Answer", "text": "Uninstalling the extension deletes everything stored in your browser. To delete your inventory from our server, email the address in the privacy policy with the device id shown in the extension's Settings."}}]}
 </script>
 <style>
 @font-face{font-family:"Baloo 2";src:url("/site/img/baloo2.woff2") format("woff2");font-weight:400 800;font-display:swap}
@@ -104,98 +101,46 @@ footer p{margin:8px 0}
 }
 </style>
 </head>
+<style>.page{max-width:760px;margin:30px auto 0}.page h1{font-family:"Baloo 2","Baloo 2 fallback",sans-serif;font-weight:800;font-size:clamp(36px,5vw,56px);line-height:1.05;margin:0 0 16px;color:#fff;text-shadow:0 6px 0 #3E6CCB,0 14px 30px rgba(30,60,130,.32)}.page h2{font-family:"Baloo 2","Baloo 2 fallback",sans-serif;font-weight:800;font-size:30px;margin:34px 0 10px;color:#fff;text-shadow:0 4px 0 #3E6CCB,0 8px 20px rgba(30,60,130,.3)}.page p,.page li{font-size:18px;line-height:1.55;font-weight:700;text-shadow:0 1px 0 rgba(30,60,130,.25)}.page a{color:#FFE08A}.page ol{padding-left:22px}.page li{margin:8px 0}table{border-collapse:collapse;width:100%;margin:10px 0;background:rgba(255,255,255,.14);border-radius:14px;overflow:hidden}th,td{text-align:left;padding:10px 12px;font-size:16px;font-weight:700;vertical-align:top}th{background:rgba(255,255,255,.18);font-family:"Baloo 2","Baloo 2 fallback",sans-serif;font-size:18px}tr+tr td{border-top:1px solid rgba(255,255,255,.18)}</style>
 <body>
 <div class="wrap">
   <header><a href="/"><img src="/site/img/icon-128.png" alt="" width="56" height="56"><span class="mark">Pets<small>for Canvas</small></span></a></header>
+  <main class="page">
+    <h1>A Canvas extension with a pet</h1>
+    <p>A Canvas extension is a browser add-on that changes how Canvas LMS pages look or work. Pets for Canvas is a free, open-source Chrome extension that adds a pet to your Canvas pages. It walks around while you work, gets happy when you submit, gets sad when something is overdue, and falls asleep at night.</p>
+    <p><a class="btn" href="https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc">Install</a></p>
 
-  <section class="hero">
-    <div>
-      <h1>A pet that lives in your Canvas</h1>
-      <a class="btn" href="https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc">Install</a>
-      <p class="sub"><span>Chrome extension,</span> <span>free,</span> <span><a href="https://github.com/alec-mart/pets-for-canvas">open source</a>,</span> <span>no login</span></p>
-      <p class="def">Pets for Canvas is a free, open-source <a href="/canvas-extension">Chrome extension</a> that puts a pet on your school's Canvas LMS pages.</p>
-    </div>
-    <img src="/site/img/hero.png" alt="Winston the puppy and a kitten" width="760" height="520" fetchpriority="high" decoding="async">
-  </section>
+    <h2>What it adds to Canvas</h2>
+    <ul>
+      <li>🐾 A pet that lives on your Canvas pages. Pick your first friend: the pup or the kitten.</li>
+      <li>🔥 Streaks, milestones, and paydays. Finish everything due each day and your streak grows.</li>
+      <li>🪙 Coins from real work. Submit assignments to earn coins. Coins can't be bought.</li>
+      <li>🧥 Collars, clothing boxes, and new animals in the shop.</li>
+      <li>🔒 No login, no Canvas token. Nothing personal leaves your browser: no names, no grades, no messages.</li>
+    </ul>
 
-  <section class="row">
-    <div class="text">
-      <h2>What it does</h2>
-      <p>Pets for Canvas puts a little friend on your Canvas pages. It walks around while you work, gets happy when you submit, gets sad when something is overdue, and falls asleep at night.</p>
-    </div>
-    <figure><div class="frame"><img src="/site/img/1-canvas.jpg" srcset="/site/img/1-canvas-640.jpg 640w, /site/img/1-canvas.jpg 1280w" sizes="(max-width:820px) calc(100vw - 40px), 520px" alt="Pets live in your Canvas" width="1280" height="800" loading="lazy" decoding="async"></div><figcaption>Pets live in your Canvas</figcaption></figure>
-  </section>
+    <h2>How to install</h2>
+    <ol>
+      <li>Open <a href="https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc">Pets for Canvas on the Chrome Web Store</a> and add it to Chrome.</li>
+      <li>Open your Canvas and click the extension icon to pick and name your first friend.</li>
+      <li>If your school runs Canvas on its own web address, click "Use on this site" when the extension offers it.</li>
+    </ol>
 
-  <section class="row flip">
-    <div class="text">
-      <ul>
-        <li>🐾 Pick your first friend: the pup or the kitten</li>
-        <li>🦴 Feed, pet, walk, and name your pet</li>
-        <li>🏫 Works with any school on Canvas</li>
-      </ul>
-    </div>
-    <figure><div class="frame"><img src="/site/img/2-adopt.jpg" srcset="/site/img/2-adopt-640.jpg 640w, /site/img/2-adopt.jpg 1280w" sizes="(max-width:820px) calc(100vw - 40px), 520px" alt="Adopt new friends" width="1280" height="800" loading="lazy" decoding="async"></div><figcaption>Adopt new friends</figcaption></figure>
-  </section>
+    <h2>Works alongside other Canvas extensions</h2>
+    <p>Pets for Canvas does not replace the extensions students already use. It adds a pet, and it runs next to them.</p>
+    <table>
+      <tr><th>Extension</th><th>What it does</th><th>With Pets for Canvas</th></tr>
+      <tr><td>BetterCampus (formerly Better Canvas)</td><td>Themes, dark mode, dashboard customization, GPA tools</td><td>Runs alongside. The pet lives on the page whatever the theme.</td></tr>
+      <tr><td>Tasks for Canvas</td><td>A to-do sidebar for assignments</td><td>Runs alongside. Submit from either; the pet reacts the same way.</td></tr>
+      <tr><td>Pets for Canvas</td><td>A pet, streaks, coins, collars, and new animals</td><td>Free, open source, no login.</td></tr>
+    </table>
 
-  <section class="row">
-    <div class="text">
-      <h2>Streaks, milestones, and paydays</h2>
-      <ul>
-        <li>🔥 Finish everything due today to keep the flame lit.</li>
-        <li>🔥 Nothing due today? Your streak is safe.</li>
-        <li>🔥 Miss a due date and the flame goes out.</li>
-        <li>🦴 Every streak day earns treats. Milestones pay big.</li>
-        <li>🔥 Long streaks unlock animals coins alone can't buy.</li>
-        <li>🏆 Your best streak is always remembered.</li>
-      </ul>
-    </div>
-    <figure><div class="frame"><img src="/site/img/4-streak.jpg" srcset="/site/img/4-streak-640.jpg 640w, /site/img/4-streak.jpg 1280w" sizes="(max-width:820px) calc(100vw - 40px), 520px" alt="Keep your streak, earn coins" width="1280" height="800" loading="lazy" decoding="async"></div><figcaption>Keep your streak, earn coins</figcaption></figure>
-  </section>
-
-  <section class="row flip">
-    <div class="text">
-      <h2>Collars, clothing boxes, and new animals</h2>
-      <p>Submit assignments to earn coins. Keep your streak alive to earn treats and paydays. Spend coins on collars, open clothing boxes, and adopt new animals. Every reward comes from real work, and coins can't be bought.</p>
-    </div>
-    <figure><div class="frame"><img src="/site/img/3-dress.jpg" srcset="/site/img/3-dress-640.jpg 640w, /site/img/3-dress.jpg 1280w" sizes="(max-width:820px) calc(100vw - 40px), 520px" alt="Dress your friend" width="1280" height="800" loading="lazy" decoding="async"></div><figcaption>Dress your friend</figcaption></figure>
-  </section>
-
-  <section class="row">
-    <div class="text">
-      <ul>
-        <li>✦ Epic collars carry unique properties.</li>
-        <li>👑 Legendary collars are said to bring fortune.</li>
-        <li>🎁 Boxes never drop what you already own.</li>
-        <li>🧥 Wear what you win from the Wardrobe.</li>
-        <li>🌙 Some things only happen after dark.</li>
-        <li>🐾 Every friend has a home of its own.</li>
-      </ul>
-    </div>
-    <figure><div class="frame"><img src="/site/img/5-collect.jpg" srcset="/site/img/5-collect-640.jpg 640w, /site/img/5-collect.jpg 1280w" sizes="(max-width:820px) calc(100vw - 40px), 520px" alt="Collect them all" width="1280" height="800" loading="lazy" decoding="async"></div><figcaption>Collect them all</figcaption></figure>
-  </section>
-
-  <section class="faq">
-    <h2>Questions</h2>
-    <details><summary>Is it free?</summary><p>Yes. It is free, there is no login, and coins can't be bought.</p></details>
-    <details><summary>Does it need my Canvas token?</summary><p>No. It runs on the Canvas session you are already logged into. No accounts, no passwords, no Canvas access tokens.</p></details>
-    <details><summary>Does it work at my school?</summary><p>It works with any school on Canvas. If your school runs Canvas on its own web address, the extension offers a one-click "Use on this site" the first time you open it there.</p></details>
-    <details><summary>Does it change anything in my courses?</summary><p>No. Nothing is ever posted, submitted or changed in your courses. The pet reads what is due and whether anything is overdue, and that stays in your browser.</p></details>
-    <details><summary>How do I delete my data?</summary><p>Uninstalling the extension deletes everything stored in your browser. To delete your inventory from our server, email the address in the privacy policy with the device id shown in the extension's Settings.</p></details>
-    <p><a href="/privacy">Full privacy policy</a></p>
-  </section>
-  <section class="os">
     <h2>Open source</h2>
-    <p>The extension and the server are open source: <a href="https://github.com/alec-mart/pets-for-canvas">github.com/alec-mart/pets-for-canvas</a></p>
-    <p>Nothing personal leaves your browser: no names, no grades, no messages.</p>
-    <div class="btns"><a href="https://github.com/alec-mart/pets-for-canvas">View the source</a><a href="/privacy">Privacy policy</a></div>
-  </section>
-
-  <section class="cta">
-    <a class="btn" href="https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc">Install</a>
-  </section>
-
+    <p>The extension and the server are open source: <a href="https://github.com/alec-mart/pets-for-canvas">github.com/alec-mart/pets-for-canvas</a>. Every outbound request the extension makes is in one file.</p>
+    <p><a href="/">Home</a> · <a href="/privacy">Privacy policy</a> · <a href="/support">Support</a></p>
+  </main>
   <footer>
-    <p><a href="/canvas-extension">Canvas extension</a><a href="https://github.com/alec-mart/pets-for-canvas">Open source</a><a href="/privacy">Privacy</a><a href="/support">Support</a></p>
+    <p><a href="/">Home</a><a href="https://github.com/alec-mart/pets-for-canvas">Open source</a><a href="/privacy">Privacy</a><a href="/support">Support</a></p>
     <p>Made by a student. Pets for Canvas™ is a trademark of Winston Digital LLC.</p>
   </footer>
 </div>
