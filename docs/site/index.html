@@ -3,111 +3,173 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pets for Canvas</title>
-<meta name="description" content="A pet that lives in your Canvas. Chrome extension, free, open source, no login.">
+<title>Pets for Canvas – A pet that lives in your Canvas | Free Chrome extension</title>
+<meta name="description" content="A pet that lives in your Canvas. Free Chrome extension, open source, no login. Submit assignments to earn coins, keep your streak alive, adopt new animals.">
 <link rel="canonical" href="https://petsforcanvas.com/">
 <link rel="icon" type="image/png" href="/site/img/icon-128.png">
+<link rel="apple-touch-icon" href="/site/img/icon-512.png">
+<link rel="preload" href="/site/img/baloo2.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/site/img/nunito.woff2" as="font" type="font/woff2" crossorigin>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Pets for Canvas">
+<meta property="og:locale" content="en_US">
 <meta property="og:title" content="Pets for Canvas">
-<meta property="og:description" content="A pet that lives in your Canvas. Chrome extension, free, open source, no login.">
-<meta property="og:image" content="https://petsforcanvas.com/site/img/1-canvas.jpg">
+<meta property="og:description" content="A pet that lives in your Canvas. Free Chrome extension, open source, no login.">
+<meta property="og:image" content="https://petsforcanvas.com/site/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pets for Canvas: a puppy and a kitten">
 <meta property="og:url" content="https://petsforcanvas.com/">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Pets for Canvas">
+<meta name="twitter:description" content="A pet that lives in your Canvas. Free Chrome extension, open source, no login.">
+<meta name="twitter:image" content="https://petsforcanvas.com/site/img/og.jpg">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Pets for Canvas","url":"https://petsforcanvas.com/","applicationCategory":"EducationalApplication","operatingSystem":"Chrome","browserRequirements":"Google Chrome","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"A pet that lives in your Canvas. Chrome extension, free, open source, no login.","downloadUrl":"https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc","installUrl":"https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc","screenshot":["https://petsforcanvas.com/site/img/1-canvas.jpg","https://petsforcanvas.com/site/img/2-adopt.jpg","https://petsforcanvas.com/site/img/3-dress.jpg","https://petsforcanvas.com/site/img/4-streak.jpg","https://petsforcanvas.com/site/img/5-collect.jpg"],"isAccessibleForFree":true,"license":"https://www.apache.org/licenses/LICENSE-2.0","codeRepository":"https://github.com/alec-mart/pets-for-canvas","author":{"@type":"Organization","name":"Winston Digital LLC","url":"https://petsforcanvas.com/"}}
+{"@context":"https://schema.org","@graph":[
+{"@type":"Organization","@id":"https://petsforcanvas.com/#org","name":"Winston Digital LLC","url":"https://petsforcanvas.com/","logo":"https://petsforcanvas.com/site/img/icon-512.png","sameAs":["https://github.com/alec-mart"]},
+{"@type":"WebSite","@id":"https://petsforcanvas.com/#site","url":"https://petsforcanvas.com/","name":"Pets for Canvas","publisher":{"@id":"https://petsforcanvas.com/#org"}},
+{"@type":"SoftwareApplication","@id":"https://petsforcanvas.com/#app","name":"Pets for Canvas","url":"https://petsforcanvas.com/","description":"A pet that lives in your Canvas. Free Chrome extension, open source, no login.","image":"https://petsforcanvas.com/site/img/icon-512.png","applicationCategory":"EducationalApplication","applicationSubCategory":"Browser extension","operatingSystem":"Windows, macOS, Linux, ChromeOS","browserRequirements":"Requires Google Chrome","softwareVersion":"1.0.9","datePublished":"2026-09-06","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true,"license":"https://www.apache.org/licenses/LICENSE-2.0","installUrl":"https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc","downloadUrl":"https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc","sameAs":["https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc","https://github.com/alec-mart/pets-for-canvas"],"screenshot":["https://petsforcanvas.com/site/img/1-canvas.jpg","https://petsforcanvas.com/site/img/2-adopt.jpg","https://petsforcanvas.com/site/img/3-dress.jpg","https://petsforcanvas.com/site/img/4-streak.jpg","https://petsforcanvas.com/site/img/5-collect.jpg"],"author":{"@id":"https://petsforcanvas.com/#org"},"publisher":{"@id":"https://petsforcanvas.com/#org"}},
+{"@type":"SoftwareSourceCode","codeRepository":"https://github.com/alec-mart/pets-for-canvas","programmingLanguage":"JavaScript","license":"https://www.apache.org/licenses/LICENSE-2.0","targetProduct":{"@id":"https://petsforcanvas.com/#app"}}
+]}
 </script>
 <style>
 @font-face{font-family:"Baloo 2";src:url("/site/img/baloo2.woff2") format("woff2");font-weight:400 800;font-display:swap}
 @font-face{font-family:"Nunito";src:url("/site/img/nunito.woff2") format("woff2");font-weight:400 900;font-display:swap}
+@font-face{font-family:"Baloo 2 fallback";src:local("Arial Rounded MT Bold"),local("Arial");size-adjust:112%;ascent-override:95%;descent-override:30%}
 *{box-sizing:border-box}
 html,body{margin:0}
-body{font-family:"Nunito",-apple-system,Segoe UI,sans-serif;color:#fff;background:radial-gradient(120% 110% at 30% 0%,#B9D2FB 0%,#7FAAF6 45%,#5B8DEF 100%) fixed;min-height:100vh}
-.wrap{max-width:1080px;margin:0 auto;padding:40px 20px 60px}
-header{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-header img{width:64px;height:64px;border-radius:16px;box-shadow:0 8px 20px rgba(120,80,10,.25)}
-.mark{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:44px;line-height:1;color:#fff;text-shadow:0 4px 0 #3E6CCB,0 8px 20px rgba(30,60,130,.3)}
-.mark small{font-size:22px;color:#FFE08A;text-shadow:0 2px 0 rgba(30,60,130,.35);margin-left:8px}
-.hero{margin:48px 0 28px;text-align:center}
-.hero h1{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:clamp(40px,7vw,84px);line-height:1.02;margin:0 0 22px;color:#fff;text-shadow:0 6px 0 #3E6CCB,0 14px 30px rgba(30,60,130,.32)}
-.btn{display:inline-block;background:linear-gradient(180deg,#F6C13C,#E39A1F);color:#fff;text-decoration:none;font-family:"Baloo 2",sans-serif;font-weight:800;font-size:24px;padding:14px 38px;border-radius:16px;border-bottom:5px solid #B8760F;box-shadow:0 10px 24px rgba(120,80,10,.32);text-shadow:0 1px 0 rgba(120,70,0,.35)}
+body{font-family:"Nunito",-apple-system,Segoe UI,sans-serif;color:#fff;background:#6E9EF3;min-height:100vh}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(120% 110% at 30% 0%,#B9D2FB 0%,#7FAAF6 45%,#5B8DEF 100%)}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 20px 60px}
+header a{display:inline-flex;align-items:center;gap:14px;text-decoration:none}
+header img{width:56px;height:56px;border-radius:14px;box-shadow:0 8px 20px rgba(30,60,130,.3)}
+.mark{font-family:"Baloo 2","Baloo 2 fallback",sans-serif;font-weight:800;font-size:40px;line-height:1;color:#fff;text-shadow:0 4px 0 #3E6CCB,0 8px 20px rgba(30,60,130,.3)}
+.mark small{font-size:20px;color:#FFE08A;text-shadow:0 2px 0 rgba(30,60,130,.35);margin-left:8px}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:24px;margin:34px 0 10px}
+.hero h1{font-family:"Baloo 2","Baloo 2 fallback",sans-serif;font-weight:800;font-size:clamp(40px,6vw,74px);line-height:1.02;margin:0 0 22px;color:#fff;text-shadow:0 6px 0 #3E6CCB,0 14px 30px rgba(30,60,130,.32)}
+.hero img{width:100%;height:auto;max-width:520px;justify-self:center}
+.btn{display:inline-block;background:linear-gradient(180deg,#F6C13C,#E39A1F);color:#fff;text-decoration:none;font-family:"Baloo 2","Baloo 2 fallback",sans-serif;font-weight:800;font-size:24px;padding:14px 38px;border-radius:16px;border-bottom:5px solid #B8760F;box-shadow:0 10px 24px rgba(120,80,10,.32);text-shadow:0 1px 0 rgba(120,70,0,.35)}
 .btn:active{transform:translateY(3px);border-bottom-width:2px}
 .sub{margin:14px 0 0;font-weight:800;color:#fff;text-shadow:0 1px 0 rgba(30,60,130,.3)}
+.sub span{white-space:nowrap}
 .sub a{color:#FFE08A;text-decoration:underline}
-.shots{display:grid;gap:22px;margin-top:40px}
-.shots figure{margin:0;border-radius:20px;overflow:hidden;box-shadow:0 24px 50px rgba(30,60,130,.35),0 0 0 6px rgba(255,255,255,.7)}
-.shots img{display:block;width:100%;height:auto}
-.text{max-width:760px;margin:44px auto 0;font-size:19px;line-height:1.55;font-weight:700;text-shadow:0 1px 0 rgba(30,60,130,.25)}
-.text h2{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:36px;margin:0 0 10px;color:#fff;text-shadow:0 4px 0 #3E6CCB,0 8px 20px rgba(30,60,130,.3)}
-.text p{margin:0 0 14px}
-.text ul{margin:0 0 14px;padding-left:22px}
-.text li{margin:6px 0}
-.text ul.tips{list-style:none;padding-left:0}
-.text ul.tips li{margin:9px 0}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:center;margin-top:44px}
+.row.flip .text{order:2}
+.text{font-size:19px;line-height:1.55;font-weight:700;text-shadow:0 1px 0 rgba(30,60,130,.25)}
+.text h2{font-family:"Baloo 2","Baloo 2 fallback",sans-serif;font-weight:800;font-size:34px;line-height:1.1;margin:0 0 10px;color:#fff;text-shadow:0 4px 0 #3E6CCB,0 8px 20px rgba(30,60,130,.3)}
+.text p{margin:0 0 12px}
+.text ul{list-style:none;margin:0;padding:0}
+.text li{margin:9px 0}
 .text a{color:#FFE08A}
-.text code{font-family:ui-monospace,Menlo,monospace;font-size:16px;background:rgba(255,255,255,.18);padding:2px 6px;border-radius:6px}
-.os{max-width:760px;margin:44px auto 0;background:#fff;color:#3E2A0C;border-radius:22px;padding:28px 30px;box-shadow:0 24px 50px rgba(30,60,130,.35);text-shadow:none}
-.os h2{color:#3E2A0C;text-shadow:none;font-family:"Baloo 2",sans-serif;font-weight:800;font-size:36px;margin:0 0 10px}
+figure{margin:0}
+figure .frame{border-radius:20px;overflow:hidden;box-shadow:0 24px 50px rgba(30,60,130,.35),0 0 0 6px rgba(255,255,255,.7);background:#FFD36B}
+figure img{display:block;width:100%;height:auto}
+figcaption{font-family:"Baloo 2","Baloo 2 fallback",sans-serif;font-weight:800;font-size:18px;margin:12px 4px 0;color:#FFE08A;text-shadow:0 1px 0 rgba(30,60,130,.3)}
+.os{max-width:760px;margin:52px auto 0;background:#fff;color:#3E2A0C;border-radius:22px;padding:28px 30px;box-shadow:0 24px 50px rgba(30,60,130,.35)}
+.os h2{font-family:"Baloo 2","Baloo 2 fallback",sans-serif;font-weight:800;font-size:34px;margin:0 0 10px}
 .os p{margin:0 0 12px;font-size:19px;line-height:1.55;font-weight:700}
 .os a{color:#3E6CCB}
-.os .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
-.os .row a{display:inline-block;background:linear-gradient(180deg,#6EA0F5,#5B8DEF);color:#fff;text-decoration:none;font-family:"Baloo 2",sans-serif;font-weight:800;font-size:18px;padding:10px 20px;border-radius:13px;border-bottom:4px solid #3E6CCB}
-footer{margin-top:48px;text-align:center;font-weight:800;color:#fff;text-shadow:0 1px 0 rgba(30,60,130,.3)}
+.os .btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+.os .btns a{display:inline-block;background:linear-gradient(180deg,#6EA0F5,#5B8DEF);color:#fff;text-decoration:none;font-family:"Baloo 2","Baloo 2 fallback",sans-serif;font-weight:800;font-size:18px;padding:10px 20px;border-radius:13px;border-bottom:4px solid #3E6CCB}
+.cta{text-align:center;margin-top:52px}
+footer{margin-top:44px;text-align:center;font-weight:800;color:#fff;text-shadow:0 1px 0 rgba(30,60,130,.3)}
 footer a{color:#FFE08A;text-decoration:none;margin:0 10px}
 footer p{margin:8px 0}
+@media (max-width:820px){
+  .hero{grid-template-columns:1fr;text-align:center}
+  .hero img{max-width:380px}
+  .row,.row.flip{grid-template-columns:1fr}
+  .row.flip .text{order:0}
+}
+@media (max-width:480px){
+  .wrap{padding:18px 16px 48px}
+  header img{width:44px;height:44px;border-radius:11px}
+  .mark{font-size:30px}.mark small{font-size:16px}
+  .btn{min-width:60%;text-align:center}
+  .os{padding:22px 20px}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header><img src="/site/img/icon-128.png" alt="" width="64" height="64"><div class="mark">Pets<small>for Canvas</small></div></header>
+  <header><a href="/"><img src="/site/img/icon-128.png" alt="" width="56" height="56"><span class="mark">Pets<small>for Canvas</small></span></a></header>
+
   <section class="hero">
-    <h1>A pet that lives in your Canvas</h1>
-    <a class="btn" href="https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc">Install</a>
-    <p class="sub">Chrome extension, free, <a href="https://github.com/alec-mart/pets-for-canvas">open source</a>, no login</p>
+    <div>
+      <h1>A pet that lives in your Canvas</h1>
+      <a class="btn" href="https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc">Install</a>
+      <p class="sub"><span>Chrome extension,</span> <span>free,</span> <span><a href="https://github.com/alec-mart/pets-for-canvas">open source</a>,</span> <span>no login</span></p>
+    </div>
+    <img src="/site/img/hero.png" alt="Winston the puppy and a kitten" width="760" height="520" fetchpriority="high" decoding="async">
   </section>
-  <section class="shots">
-    <figure><img src="/site/img/1-canvas.jpg" alt="Pets live in your Canvas" width="1280" height="800" loading="eager"></figure>
-    <figure><img src="/site/img/2-adopt.jpg" alt="Adopt new friends" width="1280" height="800" loading="lazy"></figure>
-    <figure><img src="/site/img/3-dress.jpg" alt="Dress your friend" width="1280" height="800" loading="lazy"></figure>
-    <figure><img src="/site/img/4-streak.jpg" alt="Keep your streak, earn coins" width="1280" height="800" loading="lazy"></figure>
-    <figure><img src="/site/img/5-collect.jpg" alt="Collect them all" width="1280" height="800" loading="lazy"></figure>
+
+  <section class="row">
+    <div class="text">
+      <h2>What it does</h2>
+      <p>Pets for Canvas puts a little friend on your Canvas pages. It walks around while you work, gets happy when you submit, gets sad when something is overdue, and falls asleep at night.</p>
+    </div>
+    <figure><div class="frame"><img src="/site/img/1-canvas.jpg" srcset="/site/img/1-canvas-640.jpg 640w, /site/img/1-canvas.jpg 1280w" sizes="(max-width:820px) calc(100vw - 40px), 520px" alt="Pets live in your Canvas" width="1280" height="800" loading="lazy" decoding="async"></div><figcaption>Pets live in your Canvas</figcaption></figure>
   </section>
-  <section class="text">
-    <h2>What it does</h2>
-    <p>Pets for Canvas puts a little friend on your Canvas pages. It walks around while you work, gets happy when you submit, gets sad when something is overdue, and falls asleep at night.</p>
-    <ul class="tips">
-      <li>🐾 Pick your first friend: the pup or the kitten</li>
-      <li>🦴 Feed, pet, walk, and name your pet</li>
-      <li>🏫 Works with any school on Canvas</li>
-    </ul>
+
+  <section class="row flip">
+    <div class="text">
+      <ul>
+        <li>🐾 Pick your first friend: the pup or the kitten</li>
+        <li>🦴 Feed, pet, walk, and name your pet</li>
+        <li>🏫 Works with any school on Canvas</li>
+      </ul>
+    </div>
+    <figure><div class="frame"><img src="/site/img/2-adopt.jpg" srcset="/site/img/2-adopt-640.jpg 640w, /site/img/2-adopt.jpg 1280w" sizes="(max-width:820px) calc(100vw - 40px), 520px" alt="Adopt new friends" width="1280" height="800" loading="lazy" decoding="async"></div><figcaption>Adopt new friends</figcaption></figure>
   </section>
-  <section class="text">
-    <h2>Streaks, milestones, and paydays</h2>
-    <ul class="tips">
-      <li>🔥 Finish everything due today to keep the flame lit.</li>
-      <li>🔥 Nothing due today? Your streak is safe.</li>
-      <li>🔥 Miss a due date and the flame goes out.</li>
-      <li>🦴 Every streak day earns treats. Milestones pay big.</li>
-      <li>🔥 Long streaks unlock animals coins alone can't buy.</li>
-      <li>🏆 Your best streak is always remembered.</li>
-    </ul>
+
+  <section class="row">
+    <div class="text">
+      <h2>Streaks, milestones, and paydays</h2>
+      <ul>
+        <li>🔥 Finish everything due today to keep the flame lit.</li>
+        <li>🔥 Nothing due today? Your streak is safe.</li>
+        <li>🔥 Miss a due date and the flame goes out.</li>
+        <li>🦴 Every streak day earns treats. Milestones pay big.</li>
+        <li>🔥 Long streaks unlock animals coins alone can't buy.</li>
+        <li>🏆 Your best streak is always remembered.</li>
+      </ul>
+    </div>
+    <figure><div class="frame"><img src="/site/img/4-streak.jpg" srcset="/site/img/4-streak-640.jpg 640w, /site/img/4-streak.jpg 1280w" sizes="(max-width:820px) calc(100vw - 40px), 520px" alt="Keep your streak, earn coins" width="1280" height="800" loading="lazy" decoding="async"></div><figcaption>Keep your streak, earn coins</figcaption></figure>
   </section>
-  <section class="text">
-    <h2>Collars, clothing boxes, and new animals</h2>
-    <p>Submit assignments to earn coins. Keep your streak alive to earn treats and paydays. Spend coins on collars, open clothing boxes, and adopt new animals. Every reward comes from real work, and coins can't be bought.</p>
-    <ul class="tips">
-      <li>✦ Epic collars carry unique properties.</li>
-      <li>👑 Legendary collars are said to bring fortune.</li>
-      <li>🎁 Boxes never drop what you already own.</li>
-      <li>🧥 Wear what you win from the Wardrobe.</li>
-      <li>🌙 Some things only happen after dark.</li>
-      <li>🐾 Every friend has a home of its own.</li>
-    </ul>
+
+  <section class="row flip">
+    <div class="text">
+      <h2>Collars, clothing boxes, and new animals</h2>
+      <p>Submit assignments to earn coins. Keep your streak alive to earn treats and paydays. Spend coins on collars, open clothing boxes, and adopt new animals. Every reward comes from real work, and coins can't be bought.</p>
+    </div>
+    <figure><div class="frame"><img src="/site/img/3-dress.jpg" srcset="/site/img/3-dress-640.jpg 640w, /site/img/3-dress.jpg 1280w" sizes="(max-width:820px) calc(100vw - 40px), 520px" alt="Dress your friend" width="1280" height="800" loading="lazy" decoding="async"></div><figcaption>Dress your friend</figcaption></figure>
   </section>
+
+  <section class="row">
+    <div class="text">
+      <ul>
+        <li>✦ Epic collars carry unique properties.</li>
+        <li>👑 Legendary collars are said to bring fortune.</li>
+        <li>🎁 Boxes never drop what you already own.</li>
+        <li>🧥 Wear what you win from the Wardrobe.</li>
+        <li>🌙 Some things only happen after dark.</li>
+        <li>🐾 Every friend has a home of its own.</li>
+      </ul>
+    </div>
+    <figure><div class="frame"><img src="/site/img/5-collect.jpg" srcset="/site/img/5-collect-640.jpg 640w, /site/img/5-collect.jpg 1280w" sizes="(max-width:820px) calc(100vw - 40px), 520px" alt="Collect them all" width="1280" height="800" loading="lazy" decoding="async"></div><figcaption>Collect them all</figcaption></figure>
+  </section>
+
   <section class="os">
     <h2>Open source</h2>
     <p>The extension and the server are open source: <a href="https://github.com/alec-mart/pets-for-canvas">github.com/alec-mart/pets-for-canvas</a></p>
     <p>Nothing personal leaves your browser: no names, no grades, no messages.</p>
-    <div class="row"><a href="https://github.com/alec-mart/pets-for-canvas">View the source</a><a href="/privacy">Privacy policy</a></div>
+    <div class="btns"><a href="https://github.com/alec-mart/pets-for-canvas">View the source</a><a href="/privacy">Privacy policy</a></div>
   </section>
+
+  <section class="cta">
+    <a class="btn" href="https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc">Install</a>
+  </section>
+
   <footer>
     <p><a href="https://github.com/alec-mart/pets-for-canvas">Open source</a><a href="/privacy">Privacy</a><a href="/support">Support</a></p>
     <p>Made by a student. Pets for Canvas™ is a trademark of Winston Digital LLC.</p>

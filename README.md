@@ -4,6 +4,8 @@ A pet that lives in your Canvas. Chrome extension, free, no login.
 
 Install: https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc
 
+Site: https://petsforcanvas.com
+
 ![Pets for Canvas on a Canvas page](docs/screenshot.png)
 
 Made by a student. Pets for Canvas™ is a trademark of Winston Digital LLC.

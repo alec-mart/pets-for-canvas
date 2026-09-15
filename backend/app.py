@@ -35,6 +35,8 @@ app.include_router(social_router)
 
 
 # per-IP rate limit on writes
+import mimetypes as _mimetypes
+_mimetypes.add_type("font/woff2", ".woff2")
 import time as _time
 from collections import defaultdict, deque
 from fastapi import Request
@@ -66,6 +68,34 @@ def _startup() -> None:
     init_db()
 
 
+SITE_HOST = "petsforcanvas.com"
+_SITE_PATHS = ("/", "/privacy", "/robots.txt", "/sitemap.xml", "/support", "/source")
+
+
+@app.middleware("http")
+async def site_middleware(request: Request, call_next):
+    path = request.url.path
+    host = (request.headers.get("host") or "").split(":")[0].lower()
+    is_site = path in _SITE_PATHS or path.startswith("/site/")
+    # the site lives on one host; the API keeps answering on every host
+    if is_site and host and host != SITE_HOST and request.method in ("GET", "HEAD"):
+        q = f"?{request.url.query}" if request.url.query else ""
+        return RedirectResponse(f"https://{SITE_HOST}{path}{q}", status_code=301)
+    head = request.method == "HEAD" and is_site
+    if head:
+        request.scope["method"] = "GET"
+    resp = await call_next(request)
+    if is_site:
+        resp.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        resp.headers["X-Content-Type-Options"] = "nosniff"
+        resp.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        resp.headers["Cache-Control"] = "public, max-age=604800" if path.startswith("/site/") else "no-cache"
+    if head:
+        resp.headers["content-length"] = resp.headers.get("content-length", "0")
+        return Response(status_code=resp.status_code, headers=dict(resp.headers), media_type=resp.media_type)
+    return resp
+
+
 @app.get("/privacy-check")
 def privacy_check() -> dict:
     return {"policy_present": _PRIVACY_MD.exists()}
@@ -83,6 +113,19 @@ REPO_URL = "https://github.com/alec-mart/pets-for-canvas"
 
 _SITE = Path(__file__).resolve().parent.parent / "docs" / "site"
 app.mount("/site", StaticFiles(directory=str(_SITE)), name="site")
+
+
+from fastapi.exceptions import HTTPException as _HTTPExc
+from starlette.exceptions import HTTPException as _StarletteHTTPExc
+
+
+@app.exception_handler(_StarletteHTTPExc)
+async def _http_exc(request: Request, exc: _StarletteHTTPExc):
+    if exc.status_code == 404 and request.headers.get("accept", "").startswith("text/html"):
+        return HTMLResponse("<!doctype html><html lang='en'><head><meta charset='utf-8'><title>Not found – Pets for Canvas</title>"
+                            "<style>body{font:800 20px 'Nunito',sans-serif;text-align:center;padding:80px 20px;color:#3E2A0C}a{color:#3E6CCB}</style></head>"
+                            "<body><p>Not found.</p><p><a href='/'>petsforcanvas.com</a></p></body></html>", status_code=404)
+    return JSONResponse({"detail": exc.detail}, status_code=exc.status_code, headers=getattr(exc, "headers", None))
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -267,9 +310,11 @@ def privacy() -> str:
     if in_list: out.append("</ul>")
     body = "\n".join(out)
     return (
-        "<!doctype html><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
-        "<title>Privacy Policy</title>"
+        "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+        "<title>Privacy Policy – Pets for Canvas</title>"
+        "<meta name='description' content='What Pets for Canvas sends, what never leaves your browser, and how to delete your data.'>"
+        "<link rel='canonical' href='https://petsforcanvas.com/privacy'><link rel='icon' type='image/png' href='/site/img/icon-128.png'>"
         "<style>body{max-width:680px;margin:40px auto;padding:0 20px;font:16px/1.55 -apple-system,Segoe UI,sans-serif;color:#222}"
         "h1{font-size:28px}h2{font-size:19px;margin-top:28px}li{margin:4px 0}</style>"
-        f"<body>{body}</body>"
+        f"</head><body>{body}</body></html>"
     )

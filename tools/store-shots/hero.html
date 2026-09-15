@@ -1,0 +1,12 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;width:760px;height:520px;background:transparent;overflow:hidden}
+.pets svg{position:absolute;overflow:visible;filter:drop-shadow(0 18px 16px rgba(30,60,130,.28))}
+.pets .pup{left:20px;top:40px;width:440px;height:440px}
+.pets .cat{left:380px;top:110px;width:380px;height:380px}
+.cd-zzz,.cd-mouth-sad,.cd-mouth-open,.cd-lids{opacity:0}
+</style></head><body><div class="pets"></div>
+<script src="ext/collar-engine.js"></script><script>
+const st=document.createElement('style');st.textContent=COLLAR_FX_CSS;document.head.appendChild(st);
+const SP={pup:["art/winston-rig.svg","translate(-4.25,-4.2) scale(0.1088)","gold"],cat:["art/cat-rig.svg","translate(-4.9,-3.6) scale(0.1066)","aurora"]};
+(async()=>{const pets=document.querySelector('.pets');for(const [k,[file,tr,collar]] of Object.entries(SP)){const txt=await (await fetch('ext/'+file)).text();const inner=txt.replace(/^[\s\S]*?<svg[^>]*>/,'').replace(/<\/svg>\s*$/,'');const w=document.createElement('div');w.innerHTML=`<svg class="${k}" viewBox="0 0 100 100"><g transform="${tr}">${inner}</g></svg>`;const svg=w.firstChild;pets.appendChild(svg);applyCollarDef(svg,COLLAR_DEFS.find(d=>d.id===collar),'h'+k);}})();
+</script></body></html>
