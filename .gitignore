@@ -7,3 +7,6 @@ backend/canvas_digest.db
 .DS_Store
 node_modules/
 dist/
+tools/live.py
+tools/inbox.py
+docs/metrics.md

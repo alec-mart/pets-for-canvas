@@ -54,9 +54,9 @@ def _migrate() -> None:
     # ledgers.created_at: milestone reachability is judged against device age
     if "ledgers" in inspect(engine).get_table_names():
         lcols = {c["name"] for c in inspect(engine).get_columns("ledgers")}
-        if "seen_at" not in lcols:
+        if "seen_at" in lcols:
             with engine.begin() as conn:
-                conn.execute(text("ALTER TABLE ledgers ADD COLUMN seen_at TIMESTAMP WITH TIME ZONE"))
+                conn.execute(text("ALTER TABLE ledgers DROP COLUMN seen_at"))
         if "created_at" not in lcols:
             with engine.begin() as conn:
                 conn.execute(text("ALTER TABLE ledgers ADD COLUMN created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP"))

@@ -11,10 +11,9 @@ const LEDGER_DEV_READY = chrome.storage.local.get("cd_dev_secret").then((r) => {
 
 // ---- API ----
 
-// GET the ledger for this install. Sends: the anonymous device id and whether the pet is switched on.
-async function netLedgerGet(deviceId, petOn = null) {
-  const q = petOn === null ? "" : `?pet=${petOn ? 1 : 0}`;
-  const r = await fetch(`${API}/ledger/${deviceId}${q}`, { cache: "no-store" });
+// GET the ledger for this install. Sends: the anonymous device id.
+async function netLedgerGet(deviceId) {
+  const r = await fetch(`${API}/ledger/${deviceId}`, { cache: "no-store" });
   if (!r.ok) throw new Error(String(r.status));
   return (await r.json()).state;
 }

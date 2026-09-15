@@ -1077,7 +1077,6 @@ document.getElementById("whyBtn").onclick = (e) => {
 
 document.getElementById("petToggle").onchange = async (e) => {
   await chrome.storage.local.set({ pet_enabled: e.target.checked });
-  ledgerGet({ fresh: true }).catch(() => {});
 };
 
 // ---- other Canvas domains ----
