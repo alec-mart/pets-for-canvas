@@ -40,6 +40,8 @@ header img{width:64px;height:64px;border-radius:16px;box-shadow:0 8px 20px rgba(
 .text p{margin:0 0 14px}
 .text ul{margin:0 0 14px;padding-left:22px}
 .text li{margin:6px 0}
+.text ul.tips{list-style:none;padding-left:0}
+.text ul.tips li{margin:9px 0}
 .text a{color:#FFE08A}
 .text code{font-family:ui-monospace,Menlo,monospace;font-size:16px;background:rgba(255,255,255,.18);padding:2px 6px;border-radius:6px}
 .os{max-width:760px;margin:44px auto 0;background:#fff;color:#3E2A0C;border-radius:22px;padding:28px 30px;box-shadow:0 24px 50px rgba(30,60,130,.35);text-shadow:none}
@@ -68,25 +70,43 @@ footer p{margin:8px 0}
     <figure><img src="/site/img/4-streak.jpg" alt="Keep your streak, earn coins" width="1280" height="800" loading="lazy"></figure>
     <figure><img src="/site/img/5-collect.jpg" alt="Collect them all" width="1280" height="800" loading="lazy"></figure>
   </section>
+  <section class="text">
+    <h2>What it does</h2>
+    <p>Pets for Canvas puts a little friend on your Canvas pages. It walks around while you work, gets happy when you submit, gets sad when something is overdue, and falls asleep at night. It knows how your semester is going, because it lives inside Canvas.</p>
+    <ul class="tips">
+      <li>🐾 Pick your first friend: the pup or the kitten</li>
+      <li>🦴 Feed, pet, walk, and name your pet</li>
+      <li>🏫 Works with any school on Canvas</li>
+    </ul>
+  </section>
+  <section class="text">
+    <h2>Streaks, milestones, and paydays</h2>
+    <ul class="tips">
+      <li>🔥 Finish everything due today to keep the flame lit.</li>
+      <li>🔥 Nothing due today? Your streak is safe.</li>
+      <li>🔥 Miss a due date and the flame goes out.</li>
+      <li>🦴 Every streak day earns treats. Milestones pay big.</li>
+      <li>🔥 Long streaks unlock animals coins alone can't buy.</li>
+      <li>🏆 Your best streak is always remembered.</li>
+    </ul>
+  </section>
+  <section class="text">
+    <h2>Collars, clothing boxes, and new animals</h2>
+    <p>Submit assignments to earn coins. Keep your streak alive to earn treats and paydays. Spend coins on collars, open clothing boxes, and adopt new animals. Every reward comes from real work, and coins can't be bought.</p>
+    <ul class="tips">
+      <li>✦ Epic collars carry unique properties.</li>
+      <li>👑 Legendary collars are said to bring fortune.</li>
+      <li>🎁 Boxes never drop what you already own.</li>
+      <li>🧥 Wear what you win from the Wardrobe.</li>
+      <li>🌙 Some things only happen after dark.</li>
+      <li>🐾 Every friend has a home of its own.</li>
+    </ul>
+  </section>
   <section class="os">
     <h2>Open source</h2>
     <p>The extension and the server are open source: <a href="https://github.com/alec-mart/pets-for-canvas">github.com/alec-mart/pets-for-canvas</a></p>
-    <p>Every outbound request the extension makes is in one file: <code>extension/network.js</code>. There is nothing else.</p>
-    <p>Each release is tagged and the tag message carries the store package's sha256, so anyone can build the zip from the repo and diff it against the store copy. The server reports the commit it was deployed from at <a href="/version">/version</a>.</p>
+    <p>Nothing personal leaves your browser: no names, no grades, no messages.</p>
     <div class="row"><a href="https://github.com/alec-mart/pets-for-canvas">View the source</a><a href="/privacy">Privacy policy</a></div>
-  </section>
-  <section class="text">
-    <h2>What it does</h2>
-    <p>Adds a pet that walks around your Canvas page. Gets happy when you submit, sad when something is overdue, and sleeps at night. Finish what is due each day and your streak grows. Streaks pay coins, coins buy collars and new animals.</p>
-  </section>
-  <section class="text">
-    <h2>What leaves your browser</h2>
-    <ul>
-      <li>The API receives an anonymous device id plus the game events it needs to keep your coin balance accurate: an assignment id when you submit, a milestone day count, shop actions, and anything you type into the feedback box.</li>
-      <li>Canvas is read on your logged-in session for overdue state, and one private entry is written to your Canvas custom data so pets follow Canvas login across devices. Nothing is ever posted, submitted or changed in your courses.</li>
-      <li>No names, no grades, no messages, no page contents, no browsing history.</li>
-    </ul>
-    <p>Full policy: <a href="/privacy">petsforcanvas.com/privacy</a></p>
   </section>
   <footer>
     <p><a href="https://github.com/alec-mart/pets-for-canvas">Open source</a><a href="/privacy">Privacy</a><a href="/support">Support</a></p>
