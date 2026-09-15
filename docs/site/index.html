@@ -12,6 +12,9 @@
 <meta property="og:image" content="https://petsforcanvas.com/site/img/1-canvas.jpg">
 <meta property="og:url" content="https://petsforcanvas.com/">
 <meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Pets for Canvas","url":"https://petsforcanvas.com/","applicationCategory":"EducationalApplication","operatingSystem":"Chrome","browserRequirements":"Google Chrome","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"A pet that lives in your Canvas. Chrome extension, free, open source, no login.","downloadUrl":"https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc","installUrl":"https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalodhmfadjcnolihhomgkdpbc","screenshot":["https://petsforcanvas.com/site/img/1-canvas.jpg","https://petsforcanvas.com/site/img/2-adopt.jpg","https://petsforcanvas.com/site/img/3-dress.jpg","https://petsforcanvas.com/site/img/4-streak.jpg","https://petsforcanvas.com/site/img/5-collect.jpg"],"isAccessibleForFree":true,"license":"https://www.apache.org/licenses/LICENSE-2.0","codeRepository":"https://github.com/alec-mart/pets-for-canvas","author":{"@type":"Organization","name":"Winston Digital LLC","url":"https://petsforcanvas.com/"}}
+</script>
 <style>
 @font-face{font-family:"Baloo 2";src:url("/site/img/baloo2.woff2") format("woff2");font-weight:400 800;font-display:swap}
 @font-face{font-family:"Nunito";src:url("/site/img/nunito.woff2") format("woff2");font-weight:400 900;font-display:swap}
@@ -32,6 +35,19 @@ header img{width:64px;height:64px;border-radius:16px;box-shadow:0 8px 20px rgba(
 .shots{display:grid;gap:22px;margin-top:40px}
 .shots figure{margin:0;border-radius:20px;overflow:hidden;box-shadow:0 24px 50px rgba(30,60,130,.35),0 0 0 6px rgba(255,255,255,.7)}
 .shots img{display:block;width:100%;height:auto}
+.text{max-width:760px;margin:44px auto 0;font-size:19px;line-height:1.55;font-weight:700;text-shadow:0 1px 0 rgba(30,60,130,.25)}
+.text h2{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:36px;margin:0 0 10px;color:#fff;text-shadow:0 4px 0 #3E6CCB,0 8px 20px rgba(30,60,130,.3)}
+.text p{margin:0 0 14px}
+.text ul{margin:0 0 14px;padding-left:22px}
+.text li{margin:6px 0}
+.text a{color:#FFE08A}
+.text code{font-family:ui-monospace,Menlo,monospace;font-size:16px;background:rgba(255,255,255,.18);padding:2px 6px;border-radius:6px}
+.os{max-width:760px;margin:44px auto 0;background:#fff;color:#3E2A0C;border-radius:22px;padding:28px 30px;box-shadow:0 24px 50px rgba(30,60,130,.35);text-shadow:none}
+.os h2{color:#3E2A0C;text-shadow:none;font-family:"Baloo 2",sans-serif;font-weight:800;font-size:36px;margin:0 0 10px}
+.os p{margin:0 0 12px;font-size:19px;line-height:1.55;font-weight:700}
+.os a{color:#3E6CCB}
+.os .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+.os .row a{display:inline-block;background:linear-gradient(180deg,#6EA0F5,#5B8DEF);color:#fff;text-decoration:none;font-family:"Baloo 2",sans-serif;font-weight:800;font-size:18px;padding:10px 20px;border-radius:13px;border-bottom:4px solid #3E6CCB}
 footer{margin-top:48px;text-align:center;font-weight:800;color:#fff;text-shadow:0 1px 0 rgba(30,60,130,.3)}
 footer a{color:#FFE08A;text-decoration:none;margin:0 10px}
 footer p{margin:8px 0}
@@ -51,6 +67,26 @@ footer p{margin:8px 0}
     <figure><img src="/site/img/3-dress.jpg" alt="Dress your friend" width="1280" height="800" loading="lazy"></figure>
     <figure><img src="/site/img/4-streak.jpg" alt="Keep your streak, earn coins" width="1280" height="800" loading="lazy"></figure>
     <figure><img src="/site/img/5-collect.jpg" alt="Collect them all" width="1280" height="800" loading="lazy"></figure>
+  </section>
+  <section class="os">
+    <h2>Open source</h2>
+    <p>The extension and the server are open source: <a href="https://github.com/alec-mart/pets-for-canvas">github.com/alec-mart/pets-for-canvas</a></p>
+    <p>Every outbound request the extension makes is in one file: <code>extension/network.js</code>. There is nothing else.</p>
+    <p>Each release is tagged and the tag message carries the store package's sha256, so anyone can build the zip from the repo and diff it against the store copy. The server reports the commit it was deployed from at <a href="/version">/version</a>.</p>
+    <div class="row"><a href="https://github.com/alec-mart/pets-for-canvas">View the source</a><a href="/privacy">Privacy policy</a></div>
+  </section>
+  <section class="text">
+    <h2>What it does</h2>
+    <p>Adds a pet that walks around your Canvas page. Gets happy when you submit, sad when something is overdue, and sleeps at night. Finish what is due each day and your streak grows. Streaks pay coins, coins buy collars and new animals.</p>
+  </section>
+  <section class="text">
+    <h2>What leaves your browser</h2>
+    <ul>
+      <li>The API receives an anonymous device id plus the game events it needs to keep your coin balance accurate: an assignment id when you submit, a milestone day count, shop actions, and anything you type into the feedback box.</li>
+      <li>Canvas is read on your logged-in session for overdue state, and one private entry is written to your Canvas custom data so pets follow Canvas login across devices. Nothing is ever posted, submitted or changed in your courses.</li>
+      <li>No names, no grades, no messages, no page contents, no browsing history.</li>
+    </ul>
+    <p>Full policy: <a href="/privacy">petsforcanvas.com/privacy</a></p>
   </section>
   <footer>
     <p><a href="https://github.com/alec-mart/pets-for-canvas">Open source</a><a href="/privacy">Privacy</a><a href="/support">Support</a></p>

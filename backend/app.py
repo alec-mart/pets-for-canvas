@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI, Header, HTTPException, Query
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -88,6 +88,16 @@ app.mount("/site", StaticFiles(directory=str(_SITE)), name="site")
 @app.get("/", response_class=HTMLResponse)
 def root() -> str:
     return (_SITE / "index.html").read_text(encoding="utf-8")
+
+
+@app.get("/robots.txt", response_class=PlainTextResponse)
+def robots() -> str:
+    return (_SITE / "robots.txt").read_text(encoding="utf-8")
+
+
+@app.get("/sitemap.xml")
+def sitemap() -> Response:
+    return Response((_SITE / "sitemap.xml").read_text(encoding="utf-8"), media_type="application/xml")
 
 
 @app.get("/source")
