@@ -6,6 +6,7 @@
     equipped: { collar: "gold", animal: "pup" }, names: { animal_pup: "Winston", animal_cat: "Mochi" },
     free_boxes: 0, first_box: 0, adopted: 1, welcome_claimed: 1, milestones_pending: [], day: "", day_counts: {} };
   if (state === "shop") econ.owned = econ.owned.filter((k) => k !== "animal_cat"); // the kitten is for sale in the shop shot
+  if (state === "cat") { econ.equipped = { collar: "aurora", animal: "animal_cat" }; }
   const S = { device_id: "storeshot0000000000000000000000", cd_econ: econ, pet_name: "Winston",
     cd_streak_display: { n: 23, displayN: 23, state: "extended", high: 41, date: "2026-09-06", broke: false, at: Date.now() },
     pet_state: { mood: "content", x: 64, y: 0 }, cd_treats: { plain: 4, rare: 1 }, tour_done: true, tour_started: true,
@@ -22,13 +23,16 @@
   };
   const realFetch = window.fetch.bind(window);
   window.fetch = (u, o) => (String(u).includes("railway.app") ? Promise.reject(new Error("offline for the shot")) : realFetch(u, o));
+  // animation frames resolve at once so count-ups land on their final value in a still
+  window.requestAnimationFrame = (cb) => setTimeout(() => cb(performance.now() + 5000), 0);
   window.addEventListener("load", () => setTimeout(() => {
     if (window.countUp) window.countUp = (el, n) => { el.textContent = String(n); }; // no animated numbers in a still
     if (state === "shop") document.getElementById("openShop").click();
     if (state === "wardrobe") document.getElementById("openWardrobe").click();
+    if (state === "reveal") { celebrateCollar({ collar: { id: "gold", name: "Gold" }, tier: "legendary" }); setTimeout(() => { const ov = document.getElementById("boxReveal"); ov.classList.add("opening", "lift"); ov.querySelectorAll(".br-beam, .br-box, .br-tap").forEach((el) => { el.style.display = "none"; }); ov.querySelectorAll("#boxReveal, #boxReveal *").forEach((el) => { el.style.animationDelay = "0s"; el.style.animationDuration = "0.01s"; el.style.animationFillMode = "forwards"; }); }, 600); }
     if (state === "claim") { window.requestAnimationFrame = () => 0; showStreakReward(100, [{ kind: "milestone", days: 25, coins: 100 }]); setTimeout(() => { document.getElementById("srAmount").textContent = "+100"; document.querySelectorAll("#streakReward, #streakReward *").forEach((el) => { el.style.animationDelay = "0s"; el.style.animationDuration = "0.01s"; el.style.animationFillMode = "forwards"; }); }, 800); }
     document.documentElement.dataset.shot = state;
     // count-ups run on real timers; pin the balance so the shot never catches a number mid-flight
-    setTimeout(() => { for (const id of ["coins", "coins2", "coins3"]) { const el = document.getElementById(id); if (el) el.textContent = String(econ.balance); } }, 2500);
+    const pin = () => { for (const id of ["coins", "coins2", "coins3"]) { const el = document.getElementById(id); if (el) el.textContent = String(econ.balance); } }; for (let t = 200; t <= 6000; t += 200) setTimeout(pin, t);
   }, 400));
 })();

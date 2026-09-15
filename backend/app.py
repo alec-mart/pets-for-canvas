@@ -10,6 +10,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Header, HTTPException, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sqlalchemy import func, insert, select
@@ -80,9 +81,13 @@ STORE_URL = "https://chromewebstore.google.com/detail/pets-for-canvas/cgmbkkaalo
 REPO_URL = "https://github.com/alec-mart/pets-for-canvas"
 
 
-@app.get("/")
-def root() -> RedirectResponse:
-    return RedirectResponse(STORE_URL, status_code=302)
+_SITE = Path(__file__).resolve().parent.parent / "docs" / "site"
+app.mount("/site", StaticFiles(directory=str(_SITE)), name="site")
+
+
+@app.get("/", response_class=HTMLResponse)
+def root() -> str:
+    return (_SITE / "index.html").read_text(encoding="utf-8")
 
 
 @app.get("/source")

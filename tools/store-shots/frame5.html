@@ -1,0 +1,71 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face { font-family: "Baloo 2"; src: url("ext/fonts/baloo2.woff2") format("woff2"); font-weight: 400 800; }
+@font-face { font-family: "Nunito"; src: url("ext/fonts/nunito.woff2") format("woff2"); font-weight: 400 900; }
+html,body{margin:0;width:1280px;height:800px;overflow:hidden}
+body{position:relative;background:radial-gradient(120% 110% at 30% 0%, #FFF3CE 0%, #FFD36B 48%, #F3B94A 100%);font-family:"Baloo 2",sans-serif}
+.ground{position:absolute;left:0;right:0;bottom:0;height:120px;background:linear-gradient(180deg,#F1B441,#E29A22)}
+.hill{position:absolute;left:-10%;width:120%;height:200px;bottom:70px;border-radius:50% 50% 0 0;background:#F7C95A;opacity:.9}
+.hill.b{left:30%;width:90%;bottom:90px;height:150px;background:#FBD97E}
+.mark{position:absolute;left:40px;top:30px;color:#fff;text-shadow:0 4px 0 #B8791A,0 8px 20px rgba(120,80,10,.28);font-weight:800;font-size:52px;line-height:1}
+.mark small{font-size:26px;color:#7A4E08;text-shadow:0 2px 0 rgba(255,255,255,.35);margin-left:10px}
+.head{position:absolute;left:64px;top:190px;width:560px;z-index:1;font-weight:800;font-size:112px;line-height:1.02;color:#fff;text-shadow:0 6px 0 #B8791A,0 14px 30px rgba(120,80,10,.3);letter-spacing:-.01em}
+.head.small{font-size:96px}
+.head.big{left:0;width:1280px;top:70px;text-align:center;font-size:168px;line-height:.98}
+.win{position:absolute;border-radius:22px;overflow:hidden;box-shadow:0 34px 70px rgba(120,80,10,.34),0 0 0 7px rgba(255,255,255,.65);background:#F1F3F9}
+.win iframe{width:360px;height:600px;border:0;display:block;background:#F1F3F9;transform-origin:top left}
+.ghost{opacity:.42;filter:blur(1px);box-shadow:0 20px 50px rgba(120,80,10,.2),0 0 0 6px rgba(255,255,255,.4)}
+/* popup: one popup, big, bleeding off the bottom; a larger faded copy behind it */
+.popup .win.front{left:700px;top:112px;width:497px;height:828px}
+.popup .win.front iframe{transform:scale(1.38)}
+.popup .win.ghost{left:940px;top:40px;width:540px;height:900px}
+.popup .win.ghost iframe{transform:scale(1.5)}
+/* page: the Canvas page, large, bleeding right; faded copy behind */
+.page .win.front{left:600px;top:150px;width:900px;height:640px}
+.page .win.ghost{left:700px;top:60px;width:900px;height:640px}
+.bar{height:36px;background:#F1F3F9;display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:1px solid #DDE3F0}
+.bar i{width:12px;height:12px;border-radius:50%;background:#D9DFEA;display:block}
+.shot{position:absolute;top:36px;left:0;right:0;bottom:0;overflow:hidden}
+.shot img{position:absolute;width:1485px;height:812px;left:-110px;top:-120px}
+/* animals: the three rigs, big, on the ground line */
+.pets{position:absolute;left:0;top:0;width:1280px;height:800px;z-index:2}
+.pool{position:absolute;left:0;top:340px;width:1280px;height:460px;z-index:1;pointer-events:none;
+  background:radial-gradient(60% 55% at 50% 62%, rgba(255,255,255,.55) 0%, rgba(255,255,255,.22) 40%, rgba(255,255,255,0) 72%)}
+.floor{position:absolute;left:0;right:0;top:0;height:800px;z-index:1;pointer-events:none;
+  background:linear-gradient(180deg, rgba(0,0,0,0) 72%, rgba(120,80,10,.10) 100%)}
+.pets .shadow{position:absolute;border-radius:50%;background:radial-gradient(ellipse at center, rgba(120,80,10,.30) 0%, rgba(120,80,10,.14) 45%, rgba(120,80,10,0) 72%)}
+.pets svg{position:absolute;overflow:visible;filter:drop-shadow(0 18px 14px rgba(120,80,10,.28))}
+.pets .cd-zzz,.pets .cd-mouth-sad,.pets .cd-mouth-open,.pets .cd-lids{opacity:0}
+.pets .pup{left:470px;top:440px;width:340px;height:340px}
+.pets .cat{left:880px;top:460px;width:320px;height:320px}
+.pets .capy{left:40px;top:370px;width:420px;height:420px;transform:scaleX(-1)}
+.ovcat{position:absolute;overflow:visible;z-index:3}
+.ovcat .cd-zzz,.ovcat .cd-mouth-sad,.ovcat .cd-mouth-open,.ovcat .cd-lids{opacity:0}
+</style></head><body>
+<div class="head" id="head"></div>
+<div id="stage"></div>
+<script src="ext/collar-engine.js"></script>
+<script>
+const q=new URLSearchParams(location.search);
+const head=document.getElementById('head'); head.innerHTML=(q.get('t')||'').split('|').join('<br>');
+if(q.get('small')) head.classList.add('small'); if(q.get('big')) head.classList.add('big');
+const st=document.getElementById('stage'); const layout=q.get('layout')||'popup'; document.body.classList.add(layout);
+const SP={pup:["art/winston-rig.svg","translate(-4.25,-4.2) scale(0.1088)"],cat:["art/cat-rig.svg","translate(-4.9,-3.6) scale(0.1066)"],capy:["art/capy-rig.svg","translate(100.7,13.4) scale(-0.098,0.098)"]};
+async function rig(k){ const [file,tr]=SP[k]; const txt=await (await fetch('ext/'+file)).text(); const inner=txt.replace(/^[\s\S]*?<svg[^>]*>/,'').replace(/<\/svg>\s*$/,''); return `<g transform="${tr}">${inner}</g>`; }
+function fxcss(){ const fx=document.createElement('style'); fx.textContent=COLLAR_FX_CSS; document.head.appendChild(fx); }
+if(layout==='popup'){ const a=q.get('a'), b=q.get('b')||a; st.innerHTML=`<div class="win ghost"><iframe src="ext/shot.html?state=${b}"></iframe></div><div class="win front"><iframe src="ext/shot.html?state=${a}"></iframe></div>`; }
+else if(layout==='page'){
+  const win=(cls)=>`<div class="win ${cls}"><div class="bar"><i></i><i></i><i></i></div><div class="shot"><img src="page.png"></div></div>`;
+  st.innerHTML=win('ghost')+win('front');
+  // pets=pup:gold:x:y:size[:flip],cat:aurora:x:y:size  (shot coordinates) composited on the bare capture
+  if(q.get('pets')){ fxcss(); (async()=>{ const shot=document.querySelector('.win.front .shot');
+    for(const spec of q.get('pets').split(',')){ const [k,collar,x,y,sz,flip]=spec.split(':');
+      const w=document.createElement('div'); w.innerHTML=`<svg class="ovcat" viewBox="0 0 100 100" style="left:${x}px;top:${y}px;width:${sz}px;height:${sz}px;${flip?'transform:scaleX(-1);':''}">${await rig(k)}</svg>`;
+      const svg=w.firstChild; shot.appendChild(svg); applyCollarDef(svg, COLLAR_DEFS.find(d=>d.id===collar), 'ov'+k); }
+    document.documentElement.dataset.ready='1'; })(); }
+}
+else if(layout==='animals'){ fxcss();
+  const COL={pup:'gold',cat:'aurora',capy:'rose'};
+  st.innerHTML='<div class="pool"></div><div class="floor"></div><div class="pets"><div class="shadow" style="left:60px;top:735px;width:400px;height:60px"></div><div class="shadow" style="left:500px;top:745px;width:290px;height:48px"></div><div class="shadow" style="left:910px;top:750px;width:270px;height:44px"></div></div>'; const pets=st.querySelector('.pets');
+  (async()=>{ for(const k of ['pup','cat','capy']){ const w=document.createElement('div'); w.innerHTML=`<svg class="${k}" viewBox="0 0 100 100">${await rig(k)}</svg>`; const svg=w.firstChild; pets.appendChild(svg); applyCollarDef(svg, COLLAR_DEFS.find(d=>d.id===COL[k]), 'fr'+k); } document.documentElement.dataset.ready='1'; })();
+}
+</script></body></html>
