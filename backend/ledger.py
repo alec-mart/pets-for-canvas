@@ -20,6 +20,7 @@ ledgers = Table(
     Column("device_id", String(64), primary_key=True),
     Column("state", Text, nullable=False),
     Column("updated_at", DateTime(timezone=True), server_default=func.now(), onupdate=func.now()),
+    Column("seen_at", DateTime(timezone=True)),
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
 )
 # sync codes: a short-lived, one-time code that lets another install adopt this ledger
@@ -125,6 +126,10 @@ def _load(conn, device_id: str) -> dict:
     return state
 
 
+def _seen(conn, device_id: str) -> None:
+    conn.execute(update(ledgers).where(ledgers.c.device_id == device_id).values(seen_at=func.now()))
+
+
 def _save(conn, device_id: str, state: dict) -> None:
     state = {k: v for k, v in state.items() if not k.startswith("_")}
     conn.execute(update(ledgers).where(ledgers.c.device_id == device_id).values(state=json.dumps(state)))
@@ -154,6 +159,7 @@ def get_ledger(device_id: str) -> dict:
     _check_id(device_id)
     with engine.begin() as conn:
         state = _load(conn, device_id)
+        _seen(conn, device_id)
         _save(conn, device_id, state)
         info = []
         for f in state.get("friends", [])[:FRIENDS_CAP]:
@@ -206,6 +212,7 @@ def earn(device_id: str, e: EarnIn) -> dict:
     _check_id(device_id)
     with engine.begin() as conn:
         s = _load(conn, device_id)
+        _seen(conn, device_id)
         pts = 0
         # a burst guard: no client earns more than EARNS_PER_MINUTE events a minute
         minute = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
@@ -254,6 +261,7 @@ def spend(device_id: str, sp: SpendIn, x_dev: str | None = Header(default=None))
     _check_id(device_id)
     with engine.begin() as conn:
         s = _load(conn, device_id)
+        _seen(conn, device_id)
         result: dict = {}
         a = sp.action
         if a == "equip_collar":

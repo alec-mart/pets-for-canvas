@@ -193,7 +193,7 @@ def admin_inbox(x_dev: str | None = Header(default=None), limit: int = Query(def
         fb = conn.execute(select(feedback).order_by(feedback.c.created_at.desc()).limit(limit)).mappings().all()
         # installs = ledgers: content.js creates one the first time the extension loads on a Canvas page
         import json as _json
-        led = conn.execute(select(ledgers.c.device_id, ledgers.c.state, ledgers.c.created_at, ledgers.c.updated_at)
+        led = conn.execute(select(ledgers.c.device_id, ledgers.c.state, ledgers.c.created_at, func.coalesce(ledgers.c.seen_at, ledgers.c.updated_at))
                            .order_by(ledgers.c.created_at.desc()).limit(50)).all()
         n_led = conn.execute(select(func.count()).select_from(ledgers)).scalar_one()
         n_led_wk = conn.execute(select(func.count()).select_from(ledgers).where(ledgers.c.created_at >= week)).scalar_one()
