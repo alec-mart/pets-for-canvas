@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Pets for Canvas",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "A pet that lives in your Canvas.",
   "permissions": [
     "storage",

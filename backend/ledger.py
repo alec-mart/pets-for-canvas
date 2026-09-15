@@ -61,7 +61,8 @@ EARNS_PER_MINUTE = 12
 router = APIRouter(prefix="/ledger")
 
 # ── rules ──
-SUBMISSION_POINTS, VISIT_POINTS = 5, 10   # visit: tapping a classmate's visiting pet
+SUBMISSION_POINTS, VISIT_POINTS = 5, 10
+BOX_EVERY = 5                 # a free clothing box on the first submission, then every fifth   # visit: tapping a classmate's visiting pet
 MILESTONE_POINTS = {7: 15, 10: 25, 25: 100, 30: 120, 50: 300, 75: 500, 100: 1000, 150: 1500, 200: 2000, 365: 4000}
 EARN_MUL = {"gold": 1.15}            # worn-collar rate: legendary only
 ADOPTION_GIFT, RENAME_COST, NICK_COST = 40, 100, 100
@@ -233,10 +234,15 @@ def earn(device_id: str, e: EarnIn) -> dict:
             _save(conn, device_id, s)
             return {"state": _public(s), "awarded": 0}
         mc["n"] += 1
+        box_earned = False
         if e.type == "submission":
             if e.key not in s["paid"] and s["day_counts"].get("submission", 0) < DAILY_CAPS["submission"]:
                 s["paid"][e.key] = _today(); s["day_counts"]["submission"] = s["day_counts"].get("submission", 0) + 1
                 pts = SUBMISSION_POINTS
+                n = s["submissions"] = s.get("submissions", 0) + 1
+                if n == 1 or n % BOX_EVERY == 0:
+                    s["free_boxes"] = s.get("free_boxes", 0) + 1
+                    box_earned = True
         elif e.type == "visit":
             if e.key not in s["paid"] and s["day_counts"].get("visit", 0) < DAILY_CAPS["visit"]:
                 s["paid"][e.key] = _today(); s["day_counts"]["visit"] = s["day_counts"].get("visit", 0) + 1
@@ -252,7 +258,7 @@ def earn(device_id: str, e: EarnIn) -> dict:
         pts = round(pts * mul)
         s["balance"] += pts; s["lifetime"] += pts
         _save(conn, device_id, s)
-    return {"state": _public(s), "awarded": pts}
+    return {"state": _public(s), "awarded": pts, "box_earned": box_earned}
 
 
 def _roll_tier(force: str | None) -> str:

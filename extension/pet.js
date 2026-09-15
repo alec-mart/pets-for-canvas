@@ -1524,6 +1524,46 @@
     carry = { kind, el, tip, onMove, onClick, onKey, onCtx, timer };
   }
 
+  // ---------- free box drop ----------
+  const BOX_SVG = `<svg viewBox="0 0 64 64" width="44" height="44"><rect x="8" y="26" width="48" height="32" rx="5" fill="#E8534A" stroke="#3E1E0C" stroke-width="3"/><rect x="5" y="18" width="54" height="12" rx="4" fill="#F26B62" stroke="#3E1E0C" stroke-width="3"/><rect x="28" y="18" width="8" height="40" fill="#F6C13C" stroke="#3E1E0C" stroke-width="2.5"/><path d="M32 18c-6-2-12-10-6-13 4-2 7 5 6 13zm0 0c6-2 12-10 6-13-4-2-7 5-6 13z" fill="#F6C13C" stroke="#3E1E0C" stroke-width="2.5" stroke-linejoin="round"/></svg>`;
+  let box = null;
+  function spawnBox(at) {
+    box?.el?.remove();
+    const x = at && Number.isFinite(at.x) ? at.x : Math.min(window.innerWidth - 80, state.x + SIZE + 120);
+    const yLand = at && Number.isFinite(at.y) ? Math.min(at.y + 40, window.innerHeight - 40) : window.innerHeight - 40;
+    const el = document.createElement("div");
+    el.style.cssText = `position: fixed; width: 44px; height: 44px; z-index: 2147483647; pointer-events: none;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,.28)); left: ${x - 22}px; top: ${yLand - 22}px;`;
+    el.innerHTML = BOX_SVG;
+    document.body.appendChild(el);
+    el.animate([
+      { transform: "translateY(-140px) scale(.6) rotate(-14deg)", opacity: 0 },
+      { transform: "translateY(0) scale(1.08) rotate(4deg)", opacity: 1, offset: .55 },
+      { transform: "translateY(-18px) scale(.98) rotate(-3deg)", offset: .75 },
+      { transform: "translateY(0) scale(1) rotate(0)", opacity: 1 },
+    ], { duration: 820, easing: "cubic-bezier(.2,.9,.3,1.1)", fill: "forwards" });
+    box = { x, y: yLand, el };
+    setTimeout(() => {
+      if (box?.el !== el) return;
+      const tx = clampX(x - SIZE / 2), ty = clampY(window.innerHeight - yLand - SIZE * 0.55);
+      wake(); interrupt(); clearOneShotClasses();
+      moveTo(tx, ty, { scurry: true, then: collectBox });
+    }, 700);
+  }
+  function collectBox() {
+    const b = box; if (!b) return; box = null;
+    const r = b.el.getBoundingClientRect();
+    const dx = window.innerWidth - 40 - r.left, dy = 12 - r.top;
+    emitMotes("heart", { count: 5, slow: true });
+    happyJump();
+    b.el.animate([
+      { transform: "translate(0,0) scale(1)", opacity: 1 },
+      { transform: "translate(0,-26px) scale(1.15)", opacity: 1, offset: .25 },
+      { transform: `translate(${dx}px,${dy}px) scale(.35)`, opacity: .9 },
+    ], { duration: 900, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" }).onfinish = () => b.el.remove();
+  }
+  document.addEventListener("cd-box", (e) => { if (!document.getElementById("cd-pet")) return; spawnBox(e.detail?.at ?? null); });
+
   let dropped = null; // { kind, x, y (client coords), el }; persisted across reloads
 
   function placeTreat(kind, x, y, save = true) {

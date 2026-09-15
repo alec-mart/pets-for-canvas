@@ -411,6 +411,8 @@
   .progress { margin: 0 14px 14px; animation: rise .45s .06s cubic-bezier(.2,1.4,.4,1) both; }
   .progress .lbl { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight: 800; }
   .progress .lbl .payout { color: #B07A16; }
+  .boxprog { margin-top: -6px; }
+  .boxfill { background: linear-gradient(90deg, #F6C13C, #E39A1F); }
   .bar { height: 14px; border-radius: 8px; background: #E0E8F5; overflow: hidden; position: relative;
     box-shadow: inset 0 1px 3px rgba(60,80,120,.18); }
   .fill {
@@ -662,6 +664,10 @@
     <div class="progress">
       <div class="lbl"><span id="progLabel">next milestone</span><span class="payout" id="progPayout"></span></div>
       <div class="bar"><div class="fill" id="fill"></div></div>
+    </div>
+    <div class="progress boxprog">
+      <div class="lbl"><span id="boxLabel">next box</span><span class="payout" id="boxPayout">🎁</span></div>
+      <div class="bar"><div class="fill boxfill" id="boxFill"></div></div>
     </div>
 
     <!-- @strip:visits --><button class="friendsbtn" id="openFriends">👥 Friends</button><!-- @/strip:visits -->

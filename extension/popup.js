@@ -1019,6 +1019,10 @@ async function render() {
   // coins
   const e = await getEcon();
   setCoins(e.balance);
+  // free box progress: the first submission earns a box, then every fifth
+  const subs = e.submissions ?? 0, nextBox = subs === 0 ? 1 : (Math.floor(subs / 5) + 1) * 5, from = subs === 0 ? 0 : Math.floor(subs / 5) * 5;
+  document.getElementById("boxLabel").textContent = `next box · ${subs - from} / ${nextBox - from} submissions`;
+  requestAnimationFrame(() => { document.getElementById("boxFill").style.width = `${Math.round(100 * (subs - from) / (nextBox - from))}%`; });
   // claim covers the newcomer reward (once) plus every unclaimed milestone
   const claim = document.getElementById("claimStreak");
   const pending = (e.milestones_pending ?? []).length > 0;

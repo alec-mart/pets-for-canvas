@@ -7,6 +7,10 @@
     const data = await ledgerEarn(type, key);
     if (!data) return log("queued (offline)", type, key);
     const pts = data.awarded ?? 0;
+    if (data.box_earned) {
+      document.dispatchEvent(new CustomEvent("cd-box", { detail: { at, submissions: data.state?.submissions ?? 0 } }));
+      log("free box earned", "submissions", data.state?.submissions);
+    }
     if (pts > 0) {
       // `at` = where the user's action happened; coin.js pops the "+N" there
       document.dispatchEvent(new CustomEvent("cd-points", { detail: { pts, balance: data.state?.balance, note, at } }));
