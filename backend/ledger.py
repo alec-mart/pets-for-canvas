@@ -126,8 +126,16 @@ def _load(conn, device_id: str) -> dict:
     return state
 
 
-def _seen(conn, device_id: str) -> None:
-    conn.execute(update(ledgers).where(ledgers.c.device_id == device_id).values(seen_at=func.now()))
+def _seen(conn, device_id: str, state: dict | None = None) -> None:
+    # seen_at for "active now"; days_seen (dates only, capped) for retention
+    values = {"seen_at": func.now()}
+    if state is not None:
+        today = _today()
+        days = state.setdefault("days_seen", [])
+        if today not in days:
+            days.append(today); del days[:-400]
+            values["state"] = json.dumps({k: v for k, v in state.items() if not k.startswith("_")})
+    conn.execute(update(ledgers).where(ledgers.c.device_id == device_id).values(**values))
 
 
 def _save(conn, device_id: str, state: dict) -> None:
@@ -159,7 +167,7 @@ def get_ledger(device_id: str) -> dict:
     _check_id(device_id)
     with engine.begin() as conn:
         state = _load(conn, device_id)
-        _seen(conn, device_id)
+        _seen(conn, device_id, state)
         _save(conn, device_id, state)
         info = []
         for f in state.get("friends", [])[:FRIENDS_CAP]:
@@ -212,7 +220,7 @@ def earn(device_id: str, e: EarnIn) -> dict:
     _check_id(device_id)
     with engine.begin() as conn:
         s = _load(conn, device_id)
-        _seen(conn, device_id)
+        _seen(conn, device_id, s)
         pts = 0
         # a burst guard: no client earns more than EARNS_PER_MINUTE events a minute
         minute = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
@@ -261,7 +269,7 @@ def spend(device_id: str, sp: SpendIn, x_dev: str | None = Header(default=None))
     _check_id(device_id)
     with engine.begin() as conn:
         s = _load(conn, device_id)
-        _seen(conn, device_id)
+        _seen(conn, device_id, s)
         result: dict = {}
         a = sp.action
         if a == "equip_collar":
