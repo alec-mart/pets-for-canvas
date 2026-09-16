@@ -145,6 +145,11 @@
         if (!LEDGER_DEV_SECRET) return;
         const op = JSON.parse(document.documentElement.dataset.cdDev || "{}");
         if (op.op === "reset") { await chrome.storage.local.clear(); log("DEV: install reset"); document.documentElement.dataset.cdDevDone = "reset"; }
+        if (op.op === "submit") {
+          // dev only: fake a detected submission so the whole earn path runs (server pays, box may drop)
+          document.dispatchEvent(new CustomEvent("cd-submission", { detail: { assignmentId: String(op.id ?? Date.now()), at: op.at ?? null } }));
+          document.documentElement.dataset.cdDevDone = "submit";
+        }
         if (op.op === "streak") {
           const nowD = await now(); const today = dstr(nowD);
           const started = dstr(new Date(parseD(today) - (op.days - 1) * DAY));

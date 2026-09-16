@@ -38,8 +38,10 @@ grep -rIl -e "Alec" -e "Claude" "$TMP/pkg" --exclude-dir=art --exclude-dir=fonts
 find "$TMP/pkg" -name .DS_Store -delete
 # build inputs, not runtime files: the Recraft sources (rigs are built from them) and the icon's SVG source
 rm -f "$TMP/pkg"/art/*recraft*.svg "$TMP/pkg"/icons/icon.svg "$TMP/pkg"/README.md
+# reproducible zip: fixed mtimes, sorted entries, no extra attributes, so the same source always gives the same sha256
+find "$TMP/pkg" -exec touch -t 202601010000 {} +
 mkdir -p dist && rm -f "dist/pets-for-canvas-$VER.zip"
-(cd "$TMP/pkg" && zip -qr "$OLDPWD/dist/pets-for-canvas-$VER.zip" .)
+(cd "$TMP/pkg" && find . -type f | LC_ALL=C sort | zip -q -X -D "$OLDPWD/dist/pets-for-canvas-$VER.zip" -@)
 rm -rf "$TMP"
 echo "store package: dist/pets-for-canvas-$VER.zip (DEV=false)"
 shasum -a 256 "dist/pets-for-canvas-$VER.zip"
