@@ -58,9 +58,59 @@ function takeSubmitPoint(signalEl) {
   return r && r.width ? { x: r.left + Math.min(r.width / 2, 120), y: r.top + r.height / 2 } : null;
 }
 
+// ---------- detector 1b: the submission record itself ----------
+// The receipt DOM differs between Canvas builds and is absent for quizzes and SPA submits, so the
+// assignment's own submission record (same-origin session) is the fallback truth. Only a recent
+// submission counts, so a mid-semester install cannot be paid for last month's work.
+const RECENT_MS = 7 * 86400000;
+let firedThisPage = new Set();
+async function verifySubmission(courseId, assignmentId, at) {
+  const key = `${courseId}:${assignmentId}`;
+  if (firedThisPage.has(key)) return;
+  const stamp = `cd_verified:${key}`;
+  try {
+    const last = Number(sessionStorage.getItem(stamp) || 0);
+    if (Date.now() - last < 60000) return; // a few polls after a submit click, not a loop
+    sessionStorage.setItem(stamp, String(Date.now()));
+  } catch {}
+  let sub;
+  try { sub = await netCanvasJson(`/api/v1/courses/${courseId}/assignments/${assignmentId}/submissions/self`); }
+  catch (err) { document.documentElement.setAttribute("data-cd-verify", `error ${err}`); return; }
+  const state = sub?.workflow_state, when = sub?.submitted_at ? Date.parse(sub.submitted_at) : 0;
+  const ok = ["submitted", "graded", "pending_review"].includes(state) && when && Date.now() - when < RECENT_MS;
+  document.documentElement.setAttribute("data-cd-verify", `${key} ${state} ${sub?.submitted_at || "-"} ${ok ? "recent" : "no"}`);
+  if (!ok || firedThisPage.has(key)) return;
+  firedThisPage.add(key);
+  log("submission verified via record", { courseId, assignmentId, state });
+  document.dispatchEvent(new CustomEvent("cd-submission", { detail: { courseId, assignmentId, at: at ?? null } }));
+  completion(`a:${courseId}:${assignmentId}`, document.querySelector("h1")?.textContent?.trim() || "that assignment");
+}
+async function verifyCurrentPage(at) {
+  const a = location.pathname.match(/\/courses\/(\d+)\/assignments\/(\d+)/);
+  if (a) return verifySubmission(a[1], a[2], at);
+  const q = location.pathname.match(/\/courses\/(\d+)\/quizzes\/(\d+)/);
+  if (q) {
+    try {
+      const quiz = await netCanvasJson(`/api/v1/courses/${q[1]}/quizzes/${q[2]}`);
+      if (quiz?.assignment_id) return verifySubmission(q[1], String(quiz.assignment_id), at);
+    } catch {}
+  }
+}
+// after a Submit click, the record can lag the page by a few seconds
+window.addEventListener("pointerdown", (e) => {
+  try {
+    if (!/\/courses\/\d+\/(assignments|quizzes)\/\d+/.test(location.pathname)) return;
+    const btn = e.target?.closest?.("button, input[type=submit], a.btn, [role=button]");
+    const txt = (btn?.textContent || btn?.value || "").trim();
+    if (!btn || !/^(submit|turn in)/i.test(txt)) return;
+    const at = { x: e.clientX, y: e.clientY };
+    for (const ms of [3000, 8000, 20000]) setTimeout(() => { try { sessionStorage.removeItem(`cd_verified:${location.pathname}`); } catch {} verifyCurrentPage(at); }, ms);
+  } catch {}
+}, { capture: true, passive: true });
+
 function checkSubmissionConfirmation() {
   const m = location.pathname.match(/\/courses\/(\d+)\/assignments\/(\d+)/);
-  if (!m) return;
+  if (!m) { verifyCurrentPage(null); return; }
   const [, courseId, assignmentId] = m;
 
 // several DOM generations of the receipt sidebar; "not submitted" must never match
@@ -70,7 +120,8 @@ function checkSubmissionConfirmation() {
     Array.from(document.querySelectorAll("#right-side h3, #right-side h4, [data-testid]")).find(
       (el) => isReceipt(el.textContent || "")
     );
-  if (!signal) return;
+  if (!signal) { verifyCurrentPage(null); return; }
+  firedThisPage.add(`${courseId}:${assignmentId}`);
 
   const title =
     document.querySelector("h1")?.textContent?.trim() ||
@@ -137,6 +188,7 @@ let lastHref = "";
 new MutationObserver(() => {
   if (location.href !== lastHref) {
     lastHref = location.href;
+    firedThisPage = new Set();
     setTimeout(checkSubmissionConfirmation, 800);
   }
 }).observe(document.body, { childList: true, subtree: true });
