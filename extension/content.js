@@ -168,6 +168,27 @@ function evaluateRowByHref(href) {
   const ids = href.match(/\/courses\/(\d+)\/(?:assignments|quizzes|discussion_topics)\/(\d+)/);
   log("planner checkoff detected", { type, title, href });
   completion(ids ? `p:${ids[1]}:${ids[2]}` : `p:${title}`, title);
+  if (ids && /\/assignments\//.test(href)) payCheckmark(ids[1], ids[2], row);
+}
+
+// A checkmark pays when Canvas cannot see the submission itself (external tool, on paper, no
+// submission type) or when Canvas's own record says it was submitted. Native assignments with no
+// submission on record get the pet's reaction but no coins.
+async function payCheckmark(courseId, assignmentId, row) {
+  try {
+    const a = await netCanvasJson(`/api/v1/courses/${courseId}/assignments/${assignmentId}?include[]=submission`);
+    const types = a?.submission_types || [];
+    const unseeable = types.some((t) => ["external_tool", "on_paper", "none"].includes(t));
+    const state = a?.submission?.workflow_state;
+    const submitted = ["submitted", "graded", "pending_review"].includes(state);
+    document.documentElement.setAttribute("data-cd-check", `${courseId}:${assignmentId} ${types.join("|")} ${state || "-"} ${unseeable || submitted ? "pay" : "no"}`);
+    if (!(unseeable || submitted)) return;
+    const r = row?.getBoundingClientRect?.();
+    const at = r && r.width ? { x: r.left + Math.min(r.width / 2, 160), y: r.top + r.height / 2 } : null;
+    document.dispatchEvent(new CustomEvent("cd-submission", { detail: { courseId, assignmentId, at } }));
+  } catch (err) {
+    document.documentElement.setAttribute("data-cd-check", `error ${err}`);
+  }
 }
 
 document.addEventListener(
