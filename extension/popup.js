@@ -677,6 +677,17 @@ async function renderBoxSec() {
 let forceTier = null;
 if (DEV) document.addEventListener("keydown", (e) => { if (document.getElementById("viewShop").hidden) return; if (e.key === "l") forceTier = "legendary"; if (e.key === "e") forceTier = "epic"; if (e.key === "r") forceTier = "rare"; });
 
+// free box progress under the milestone bar: the first submission earns a box, then every fifth;
+// boxes waiting to be opened get an Open right here, and the bar keeps showing progress to the next one
+function renderBoxProgress(e) {
+  const subs = e.submissions ?? 0, nextBox = subs === 0 ? 1 : (Math.floor(subs / 5) + 1) * 5, from = subs === 0 ? 0 : Math.floor(subs / 5) * 5;
+  document.getElementById("boxLabel").textContent = `next box · ${subs - from} / ${nextBox - from} submissions`;
+  requestAnimationFrame(() => { document.getElementById("boxFill").style.width = `${Math.round(100 * (subs - from) / (nextBox - from))}%`; });
+  const free = (e.free_boxes ?? 0) + (e.first_box ?? 0);
+  document.getElementById("boxReady").hidden = free === 0;
+  document.getElementById("boxCount").textContent = free > 1 ? `×${free}` : "";
+}
+document.getElementById("openBoxHome").onclick = () => document.getElementById("openBox").onclick();
 document.getElementById("openBox").onclick = async () => {
   const e = await getEcon();
   const price = await boxPriceNow();
@@ -692,6 +703,7 @@ document.getElementById("openBox").onclick = async () => {
   setCoins(r.state.balance);
   renderBoxSec();
   renderShop();
+  renderBoxProgress(r.state);
   celebrateCollar({ collar, coins: res.coins, tier: res.tier });
 };
 if (DEV) { // dev build only; the server gates it by DEV_SECRET
@@ -1019,10 +1031,7 @@ async function render() {
   // coins
   const e = await getEcon();
   setCoins(e.balance);
-  // free box progress: the first submission earns a box, then every fifth
-  const subs = e.submissions ?? 0, nextBox = subs === 0 ? 1 : (Math.floor(subs / 5) + 1) * 5, from = subs === 0 ? 0 : Math.floor(subs / 5) * 5;
-  document.getElementById("boxLabel").textContent = `next box · ${subs - from} / ${nextBox - from} submissions`;
-  requestAnimationFrame(() => { document.getElementById("boxFill").style.width = `${Math.round(100 * (subs - from) / (nextBox - from))}%`; });
+  renderBoxProgress(e);
   // claim covers the newcomer reward (once) plus every unclaimed milestone
   const claim = document.getElementById("claimStreak");
   const pending = (e.milestones_pending ?? []).length > 0;
