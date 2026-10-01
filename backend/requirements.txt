@@ -1,4 +1,4 @@
-fastapi
-uvicorn[standard]
-sqlalchemy
-psycopg2-binary; sys_platform == "linux"
+fastapi==0.141.1
+uvicorn[standard]==0.53.0
+sqlalchemy==2.0.52
+psycopg2-binary==2.9.13; sys_platform == "linux"

@@ -19,9 +19,11 @@ from sqlalchemy import (
 
 _default_sqlite = f"sqlite:///{Path(__file__).parent / 'canvas_digest.db'}"
 _url = os.environ.get("DATABASE_URL", _default_sqlite)
-# Railway hands out postgres://, SQLAlchemy 2.x wants postgresql://
-if _url.startswith("postgres://"):
-    _url = _url.replace("postgres://", "postgresql://", 1)
+# Railway hands out postgres://; name the driver so SQLAlchemy uses the one that is installed
+for _scheme in ("postgres://", "postgresql://"):
+    if _url.startswith(_scheme):
+        _url = "postgresql+psycopg2://" + _url[len(_scheme):]
+        break
 
 engine = create_engine(_url, pool_pre_ping=True)
 metadata = MetaData()
