@@ -676,6 +676,15 @@ async function renderBoxSec() {
 }
 let forceTier = null;
 if (DEV) document.addEventListener("keydown", (e) => { if (document.getElementById("viewShop").hidden) return; if (e.key === "l") forceTier = "legendary"; if (e.key === "e") forceTier = "epic"; if (e.key === "r") forceTier = "rare"; });
+/* @strip:dev */
+// dev build: boxes roll epic or legendary only, from a tier that still has a collar to give
+function devTier(e) {
+  const owned = new Set(e.owned ?? []);
+  const open = (t) => COLLARS.some((c) => c.rarity === t && !c.launch && c.id !== "comet" && !owned.has(`collar_${c.id}`));
+  const tiers = ["legendary", "epic"].filter(open);
+  return tiers.length ? tiers[Math.floor(Math.random() * tiers.length)] : "legendary";
+}
+/* @/strip:dev */
 
 // free box progress under the milestone bar: the first submission earns a box, then every fifth;
 // boxes waiting to be opened get an Open right here, and the bar keeps showing progress to the next one
@@ -696,6 +705,9 @@ document.getElementById("openBox").onclick = async () => {
     if (!(await confirmSpend({ html: `<div style="font-size:56px;line-height:1">🎁</div>`, title: "Are you sure?", note: "", price, yes: "Open" }))) return;
   }
   // the server rolls; the client only shows the result
+  /* @strip:dev */
+  if (DEV && !forceTier) forceTier = devTier(e);
+  /* @/strip:dev */
   const r = await ledgerSpend("open_box", DEV && forceTier ? { force: forceTier } : {}); forceTier = null;
   if (refused(r)) return;
   const res = r.result ?? {};
@@ -980,6 +992,7 @@ async function maybeFirstVisit() {
 async function render() {
   maybeChoose();
   maybeSitePrompt();
+  reviveStaleTabs();
   chrome.storage.local.remove(["tour_done", "tour_step", "tour_started", "tour_final_pending"]);
   /* @strip:visits */ maybeFirstVisit(); /* @/strip:visits */
   const {
@@ -1147,6 +1160,14 @@ async function maybeSitePrompt() {
   };
 }
 document.addEventListener("cd-ceremony-done", () => maybeSitePrompt());
+/* @strip:dev */
+// dev build: h pins the pet's mood to content on the page; press again to release it
+if (DEV) document.addEventListener("keydown", async (e) => {
+  if (e.key !== "h" || e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+  const { cd_dev_mood } = await chrome.storage.local.get("cd_dev_mood");
+  if (cd_dev_mood) await chrome.storage.local.remove("cd_dev_mood"); else await chrome.storage.local.set({ cd_dev_mood: "content" });
+});
+/* @/strip:dev */
 if (DEV) document.addEventListener("keydown", (e) => {
   if (e.key !== "s" || e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
   const m = document.getElementById("siteModal");
@@ -1166,6 +1187,22 @@ async function registerSite(host, origin) {
   }]);
   const { extra_hosts = [] } = await chrome.storage.local.get("extra_hosts");
   if (!extra_hosts.includes(host)) await chrome.storage.local.set({ extra_hosts: [...extra_hosts, host] });
+}
+
+// Canvas tabs opened before the install never received the content scripts; inject them once
+async function reviveStaleTabs() {
+  try {
+    const cs = chrome.runtime.getManifest().content_scripts[0];
+    const patterns = [...cs.matches];
+    for (const s of await chrome.scripting.getRegisteredContentScripts().catch(() => [])) patterns.push(...(s.matches ?? []));
+    const res = patterns.map((p) => new RegExp("^" + p.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*") + "$"));
+    for (const tab of await chrome.tabs.query({})) {
+      if (!tab.id || !tab.url || !res.some((r) => r.test(tab.url))) continue;
+      const [probe] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => !!document.documentElement.dataset.cdLoaded }).catch(() => [null]);
+      if (!probe || probe.result) continue;
+      await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: cs.js }).catch(() => {});
+    }
+  } catch {}
 }
 
 renderHeroPet();

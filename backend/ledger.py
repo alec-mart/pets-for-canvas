@@ -104,9 +104,11 @@ def _today() -> str:
 def _load(conn, device_id: str) -> dict:
     row = conn.execute(select(ledgers.c.state, ledgers.c.created_at).where(ledgers.c.device_id == device_id).with_for_update()).first()
     if row is None:
+        # a concurrent first request may create the row; the savepoint keeps this transaction usable after the conflict
         try:
-            conn.execute(insert(ledgers).values(device_id=device_id, state=json.dumps(DEFAULT)))
-        except Exception:  # two first requests raced: the other one created it — read it
+            with conn.begin_nested():
+                conn.execute(insert(ledgers).values(device_id=device_id, state=json.dumps(DEFAULT)))
+        except Exception:
             pass
         row = conn.execute(select(ledgers.c.state, ledgers.c.created_at).where(ledgers.c.device_id == device_id).with_for_update()).first()
     state = {**json.loads(json.dumps(DEFAULT)), **json.loads(row[0])}
@@ -122,7 +124,8 @@ def _load(conn, device_id: str) -> dict:
     if not state.get("pid"):
         state["pid"] = pid_of(device_id)
         try:
-            conn.execute(insert(pids).values(pid=state["pid"], device_id=device_id))
+            with conn.begin_nested():
+                conn.execute(insert(pids).values(pid=state["pid"], device_id=device_id))
         except Exception:
             pass
     return state

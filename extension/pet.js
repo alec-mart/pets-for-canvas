@@ -1767,6 +1767,9 @@
   const isNight = () => { if (!nightSleep) return false; const h = new Date().getHours(); return h >= 23 || h < 7; };
 
   async function computeMood() {
+    /* @strip:dev */
+    { const { cd_dev_mood } = await chrome.storage.local.get("cd_dev_mood"); if (cd_dev_mood) return cd_dev_mood; }
+    /* @/strip:dev */
     const overdue = await fetchOverdueCount();
     const gap = await daysSinceLastVisit();
     if (overdue > 0) return "sad";
@@ -1795,6 +1798,9 @@
   // the popup's switch, obeyed live; adoption walks him in
   chrome.storage.onChanged.addListener((ch) => {
     if (ch.cd_econ && ch.cd_econ.newValue?.adopted && !ch.cd_econ.oldValue?.adopted && !document.getElementById("cd-pet")) init({ entrance: true });
+    /* @strip:dev */
+    if (ch.cd_dev_mood && pet) computeMood().then((m) => { if (m !== state.mood) { setMood(m); if (m !== "sleeping") scheduleTick(); } }).catch(() => {});
+    /* @/strip:dev */
     if (!ch.pet_enabled) return;
     if (ch.pet_enabled.newValue === false) teardown();
     else if (!document.getElementById("cd-pet")) init();
