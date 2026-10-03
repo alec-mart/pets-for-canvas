@@ -62,6 +62,7 @@ router = APIRouter(prefix="/ledger")
 # ── rules ──
 SUBMISSION_POINTS, VISIT_POINTS = 5, 10
 BOX_EVERY = 5                 # a free clothing box on the first submission, then every fifth   # visit: tapping a classmate's visiting pet
+BOX_DROP = 0.2                # and any other submission may drop one
 MILESTONE_POINTS = {7: 15, 10: 25, 25: 100, 30: 120, 50: 300, 75: 500, 100: 1000, 150: 1500, 200: 2000, 365: 4000}
 EARN_MUL = {"gold": 1.15}            # worn-collar rate: legendary only
 ADOPTION_GIFT, RENAME_COST, NICK_COST = 40, 100, 100
@@ -228,7 +229,7 @@ def earn(device_id: str, e: EarnIn) -> dict:
                 s["paid"][e.key] = _today(); s["day_counts"]["submission"] = s["day_counts"].get("submission", 0) + 1
                 pts = SUBMISSION_POINTS
                 n = s["submissions"] = s.get("submissions", 0) + 1
-                if n == 1 or n % BOX_EVERY == 0:
+                if n == 1 or n % BOX_EVERY == 0 or random.random() < BOX_DROP:
                     s["free_boxes"] = s.get("free_boxes", 0) + 1
                     box_earned = True
         elif e.type == "visit":
